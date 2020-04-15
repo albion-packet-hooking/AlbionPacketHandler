@@ -1,5 +1,6 @@
 C# Albion Event and Operation Packet Hooking Framework
 Create new hooks by adding an attribute to your method with which EventCode or OperationCode you'd like to receive:
+
 Ex:
 [EventHandler(EventCodes.Join)]
 OR
