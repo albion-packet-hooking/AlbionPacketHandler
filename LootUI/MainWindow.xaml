@@ -1,0 +1,63 @@
+﻿<Window x:Class="LootUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loot="clr-namespace:AlbionProcessor.Model;assembly=AlbionProcessor"
+        xmlns:local="clr-namespace:LootUI"
+        mc:Ignorable="d"
+        Title="Loot Logger" Height="350" Width="525" Closing="Window_Closing">
+    <DockPanel
+        VerticalAlignment="Stretch" 
+        Height="Auto">
+
+        <DockPanel DockPanel.Dock="Top">
+            <ScrollViewer Name="LootScroller"
+                          DockPanel.Dock="Top"
+                          Height="150"
+                          Width="Auto" 
+                          VerticalAlignment="Stretch" 
+                          VerticalContentAlignment="Stretch"
+                          ScrollChanged="ScrollViewer_ScrollChanged" >
+                <TextBlock Name="LootLog" TextWrapping="Wrap"/>
+            </ScrollViewer>
+            <Button DockPanel.Dock="Right" HorizontalAlignment="Right" Width="100" Click="SaveFilter_Click">Set Filter</Button>
+            <TextBox DockPanel.Dock="Left" Name="Filter">
+                Filter
+            </TextBox>
+        </DockPanel>
+        <DockPanel DockPanel.Dock="Bottom">
+            <Button Name="ClearLoot" Click="ClearLoot_Click">Clear Loot</Button>
+            <Button Name="SaveLoot" Click="SaveLoot_Click">Save Loot</Button>
+        </DockPanel>
+        <ScrollViewer Height="auto"
+                Width="auto" 
+                VerticalAlignment="Stretch" 
+                VerticalContentAlignment="Stretch" >
+            <TreeView Name="trvPlayers">
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type local:PlayerView}" ItemsSource="{Binding Loot}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Path=Text, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text=" [" Foreground="Blue" />
+                            <TextBlock Text="{Binding Loot.Count}" Foreground="Blue" />
+                            <TextBlock Text="]" Foreground="Blue" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                    <DataTemplate DataType="{x:Type loot:Loot}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Looted (" Foreground="Green" />
+                            <TextBlock Text="{Binding Quantity}" />
+                            <TextBlock Text=")x" Foreground="Green" />
+                            <TextBlock Text="{Binding LongName}"/>
+                            <TextBlock Text=" from (" Foreground="Green" />
+                            <TextBlock Text="{Binding BodyName}"/>
+                            <TextBlock Text=") at " Foreground="Green" />
+                            <TextBlock Text="{Binding PickupTime}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

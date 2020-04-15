@@ -1,0 +1,34 @@
+﻿<Window x:Class="DebugLoggerUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loot="clr-namespace:AlbionProcessor;assembly=AlbionProcessor"
+        xmlns:local="clr-namespace:DebugLoggerUI"
+        mc:Ignorable="d"
+        Title="Loot Logger" Height="350" Width="525" Closing="Window_Closing">
+
+    <ScrollViewer Name="EventScroller" Height="auto"
+                Width="auto" 
+                VerticalAlignment="Stretch" 
+                VerticalContentAlignment="Stretch" >
+        <ListBox Name="Events">
+            <ListBox.ItemTemplate>
+
+                <DataTemplate>
+
+                    <StackPanel Orientation="Horizontal">
+
+                        <Label Content="{Binding Key}" />
+
+                        <TextBlock xml:space="preserve"></TextBlock>
+
+                        <Label Content="{Binding Value}" />
+
+                    </StackPanel>
+
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </ScrollViewer>
+</Window>
