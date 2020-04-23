@@ -52,11 +52,15 @@ namespace AlbionProcessor.Handlers
             if (container.Type != ContainerType.Unknown && container.Type != ContainerType.Player)
             {
                 Loot loot = container.Loot[position];
-                loot.LooterName = CharacterDB.Instance.Self.Name;
+                if (loot != null)
+                {
+                    loot.LooterName = CharacterDB.Instance.Self.Name;
 
-                LootDB.Instance.AddLootToPlayer(loot, CharacterDB.Instance.Self);
+                    LootDB.Instance.AddLootToPlayer(loot, CharacterDB.Instance.Self);
 
-                LootDB.Instance.RemoveItem(loot.ObjectID);
+                    LootDB.Instance.RemoveItem(loot.ObjectID);
+                    container.Loot[position] = null;
+                }
             }
         }
 

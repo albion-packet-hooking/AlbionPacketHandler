@@ -59,10 +59,42 @@ namespace AlbionProcessor
                         LongName = itemName,
                         BodyName = container.Owner
                     };
-                }
 
+                    LootDB.Instance.AddLoot(loot);
+                }
+                else
+                {
+                    loot.LooterName = playerName;
+                    loot.BodyName = container.Owner;
+                }
                 container.Loot.Add(loot);
-                LootDB.Instance.AddLootToPlayer(loot, playerName);
+                //LootDB.Instance.AddLootToPlayer(loot, playerName);
+            }
+        }
+
+        [EventHandler(EventCodes.PartyLootItemsRemoved)]
+        public static void ProcessPartyLootItemsRemoved(Dictionary<byte, object> parameters, ILog log)
+        {
+            Container container = LootDB.Instance.FindByID(parameters[0].ToString());
+
+            HashSet<int> items = new HashSet<int>(Convert(parameters[1]));
+            foreach (int itemID in items)
+            {
+                Loot item = LootDB.Instance.FindLoot(itemID);
+                if (item != null)
+                {
+                    LootDB.Instance.AddLootToPlayer(item, item.LooterName);
+                    int index = container.Loot.FindIndex(i => i != null && i.ObjectID == itemID);
+                    if (index > 0)
+                    {
+                        container.Loot[index] = null;
+                    }
+                    LootDB.Instance.RemoveItem(itemID);
+                }
+                else
+                {
+                    log.Info($"Missing item {itemID} {container.ID}");
+                }
             }
         }
 

@@ -43,8 +43,9 @@ namespace AlbionProcessor
 
             int[] itemIDs = Convert(parameters[3]);
 
-            foreach (int itemID in itemIDs)
+            for (int index = 0; index < itemIDs.Length; index++)
             {
+                int itemID = itemIDs[index];
                 Loot loot = LootDB.Instance.FindLoot(int.Parse(itemID.ToString()));
                 if (loot != null && !container.Loot.Contains(loot))
                 {
@@ -53,7 +54,7 @@ namespace AlbionProcessor
                         loot.BodyName = container.Owner;
                     }
                     log.Info($"Adding loot {loot} to container {container}");
-                    container.Loot.Add(loot);
+                    container.Loot.Insert(index, loot);
                 }
             }
         }

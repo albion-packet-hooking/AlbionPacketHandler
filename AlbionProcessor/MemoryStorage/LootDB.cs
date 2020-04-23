@@ -31,6 +31,7 @@ namespace AlbionProcessor.MemoryStorage
 
         private Dictionary<int, Loot> lootTable = new Dictionary<int, Loot>();
         private Dictionary<string, Container> containers = new Dictionary<string, Container>();
+        private Dictionary<Guid, Container> guidToContainers = new Dictionary<Guid, Container>();
 
         private static readonly Lazy<LootDB> lazy = new Lazy<LootDB>(() => new LootDB());
         public static LootDB Instance
@@ -71,6 +72,10 @@ namespace AlbionProcessor.MemoryStorage
             if (!containers.ContainsKey(container.ID))
             {
                 containers.Add(container.ID, container);
+            }
+            if(container.GUID != Guid.Empty && !guidToContainers.ContainsKey(container.GUID))
+            {
+                guidToContainers.Add(container.GUID, container);
             }
         }
 
@@ -118,11 +123,11 @@ namespace AlbionProcessor.MemoryStorage
 
         public Container FindByID(string containerId, Guid containerGuid)
         {
-            Container container = FindByID(containerId);
-            if(container == null)
+            if(containerGuid != Guid.Empty && guidToContainers.ContainsKey(containerGuid))
             {
-                return FindByGUID(containerGuid);
+                return guidToContainers[containerGuid];
             }
+            Container container = FindByID(containerId);
             return container;
         }
 
