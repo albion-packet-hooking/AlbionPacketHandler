@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:loot="clr-namespace:AlbionProcessor.Model;assembly=AlbionProcessor"
+        xmlns:loot="clr-namespace:AlbionMarshaller.Model;assembly=AlbionMarshaller"
         xmlns:local="clr-namespace:LootUI"
         mc:Ignorable="d"
         Title="Loot Logger" Height="350" Width="525" Closing="Window_Closing">

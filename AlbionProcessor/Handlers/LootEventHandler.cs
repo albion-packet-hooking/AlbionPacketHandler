@@ -1,15 +1,16 @@
 ﻿using log4net;
-using AlbionProcessor.MemoryStorage;
-using AlbionProcessor.Model;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using AlbionMarshaller;
+using AlbionMarshaller.Model;
+using AlbionMarshaller.MemoryStorage;
 
 namespace AlbionProcessor
 {
-    public class LootEventHandler : AlbionEvent
+    public class LootEventHandler : BaseEvent
     {
-        [EventHandler(EventCodes.PartyLootItems)]
+        [AlbionMarshaller.EventHandler(EventCodes.PartyLootItems)]
         public static void PartyLootItems(Dictionary<byte, object> parameters, ILog log)
         {
             if (!(parameters.ContainsKey(1) &&
@@ -72,7 +73,7 @@ namespace AlbionProcessor
             }
         }
 
-        [EventHandler(EventCodes.PartyLootItemsRemoved)]
+        [AlbionMarshaller.EventHandler(EventCodes.PartyLootItemsRemoved)]
         public static void ProcessPartyLootItemsRemoved(Dictionary<byte, object> parameters, ILog log)
         {
             Container container = LootDB.Instance.FindByID(parameters[0].ToString());
@@ -98,7 +99,7 @@ namespace AlbionProcessor
             }
         }
 
-        [EventHandler(EventCodes.OtherGrabbedLoot)]
+        [AlbionMarshaller.EventHandler(EventCodes.OtherGrabbedLoot)]
         public static void ProcessOtherGrabbedLoot(Dictionary<byte, object> parameters, ILog log)
         {
             if (!(parameters.ContainsKey(2) &&

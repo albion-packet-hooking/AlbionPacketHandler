@@ -1,14 +1,15 @@
 ﻿using log4net;
-using AlbionProcessor.MemoryStorage;
-using AlbionProcessor.Model;
 using System;
 using System.Collections.Generic;
+using AlbionMarshaller;
+using AlbionMarshaller.Model;
+using AlbionMarshaller.MemoryStorage;
 
 namespace AlbionProcessor.Handlers
 {
-    public class SelfAlbionProcessor : AlbionEvent
+    public class SelfAlbionProcessor : BaseEvent
     {
-        [EventHandler(EventCodes.InventoryPutItem)]
+        [AlbionMarshaller.EventHandler(EventCodes.InventoryPutItem)]
         public static void ProcessInventoryPutItem(Dictionary<byte, object> parameters, ILog log)
         {
             log.Info(parameters);

@@ -103,21 +103,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EventCodes.cs" />
-    <Compile Include="Handlers\AlbionEvent.cs" />
     <Compile Include="Handlers\ChestDropEventHandler.cs" />
     <Compile Include="Handlers\LootEventHandler.cs" />
     <Compile Include="Handlers\SelfLootLogger.cs" />
     <Compile Include="AlbionProcessor.cs" />
-    <Compile Include="MemoryStorage\CharacterDB.cs" />
-    <Compile Include="MemoryStorage\ItemDB.cs" />
-    <Compile Include="MemoryStorage\LootDB.cs" />
-    <Compile Include="Model\Container.cs" />
-    <Compile Include="Model\Loot.cs" />
-    <Compile Include="Model\Player.cs" />
-    <Compile Include="Handlers\NewCharacterHandler.cs" />
-    <Compile Include="OperationCodes.cs" />
-    <Compile Include="PacketHandler.cs" />
+    <Compile Include="Handlers\CharacterHandler.cs" />
     <Compile Include="PlayerConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -134,9 +124,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
-    <None Include="Resources\items.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -161,6 +148,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PacketHandler\AlbionPacketHandler.csproj">
+      <Project>{45106928-72f1-4a87-b00c-d752cb215cb1}</Project>
+      <Name>AlbionPacketHandler</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

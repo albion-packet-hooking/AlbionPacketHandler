@@ -112,6 +112,10 @@
       <Project>{1f2f66af-844c-43d7-876f-c6398c9d150f}</Project>
       <Name>AlbionProcessor</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PacketHandler\AlbionPacketHandler.csproj">
+      <Project>{45106928-72F1-4A87-B00C-D752CB215CB1}</Project>
+      <Name>AlbionPacketHandler</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

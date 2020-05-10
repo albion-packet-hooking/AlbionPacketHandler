@@ -1,15 +1,16 @@
-﻿using log4net;
-using AlbionProcessor.MemoryStorage;
-using AlbionProcessor.Model;
+﻿using AlbionMarshaller;
+using AlbionMarshaller.MemoryStorage;
+using AlbionMarshaller.Model;
+using log4net;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 
 namespace AlbionProcessor
 {
-    public class ChestDropEventHandler : AlbionEvent
+    public class ChestDropEventHandler : BaseEvent
     {
-        [EventHandler(EventCodes.DetachItemContainer)]
+        [AlbionMarshaller.EventHandler(EventCodes.DetachItemContainer)]
         public static void DetachItemContainer(Dictionary<byte, object> parameters, ILog log)
         {
             Guid containerGuid = new Guid((byte[])parameters[0]);
@@ -17,7 +18,7 @@ namespace AlbionProcessor
             LootDB.Instance.DetachContainer(containerGuid);
         }
 
-        [EventHandler(EventCodes.AttachItemContainer)]
+        [AlbionMarshaller.EventHandler(EventCodes.AttachItemContainer)]
         public static void AttachItemContainer(Dictionary<byte, object> parameters, ILog log)
         {
             string containerId = parameters[0].ToString();
@@ -59,7 +60,7 @@ namespace AlbionProcessor
             }
         }
 
-        [EventHandler(EventCodes.UpdateLootChest)]
+        [AlbionMarshaller.EventHandler(EventCodes.UpdateLootChest)]
         public static void UpdateLootChest(Dictionary<byte, object> parameters, ILog log)
         {
             string containerID = parameters[0].ToString();
@@ -81,7 +82,7 @@ namespace AlbionProcessor
             }
         }
 
-        [EventHandler(EventCodes.NewLootChest)]
+        [AlbionMarshaller.EventHandler(EventCodes.NewLootChest)]
         public static void NewLootChest(Dictionary<byte, object> parameters, ILog log)
         {
             string containerID = parameters[0].ToString();
@@ -106,7 +107,7 @@ namespace AlbionProcessor
             }
         }
 
-        [EventHandler(EventCodes.NewLoot)]
+        [AlbionMarshaller.EventHandler(EventCodes.NewLoot)]
         public static void NewLoot(Dictionary<byte, object> parameters, ILog log)
         {
             string containerID = parameters[0].ToString();
@@ -141,8 +142,8 @@ namespace AlbionProcessor
             }
         }
 
-        [EventHandler(EventCodes.NewSimpleItem)]
-        [EventHandler(EventCodes.NewEquipmentItem)]
+        [AlbionMarshaller.EventHandler(EventCodes.NewSimpleItem)]
+        [AlbionMarshaller.EventHandler(EventCodes.NewEquipmentItem)]
         public static void NewItem(Dictionary<byte, object> parameters, ILog log)
         {
             if (!(parameters.ContainsKey(0) &&
