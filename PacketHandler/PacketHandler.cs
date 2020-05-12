@@ -41,51 +41,55 @@ namespace AlbionProcessor
 
         public void Initialize()
         {
-            if(_initialized)
+            if (!_initialized)
             {
-                return;
-            }
-
-            var methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
-                                                                  .SelectMany(t => t.GetMethods())
-                                                                  .Where(m => m.GetCustomAttributes(typeof(AlbionMarshaller.EventHandler), false).Length > 0)
-                                                                  .ToArray()).ToArray();
-            foreach (MethodInfo method in methods)
-            {
-                var del = (HandleEvent)Delegate.CreateDelegate(typeof(HandleEvent), method);
-                foreach (CustomAttributeData attributeData in method.CustomAttributes)
+                lock (this)
                 {
-                    EventCodes eventCode = (EventCodes)attributeData.ConstructorArguments[0].Value;
-                    if (!_eventHandlers.ContainsKey(eventCode))
+                    new Thread(delegate ()
                     {
-                        _eventHandlers.Add(eventCode, new List<HandleEvent>());
+                        this.CreateListener();
+                    }).Start();
+
+                    var methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
+                                                                          .SelectMany(t => t.GetMethods())
+                                                                          .Where(m => m.GetCustomAttributes(typeof(AlbionMarshaller.EventHandler), false).Length > 0)
+                                                                          .ToArray()).ToArray();
+                    foreach (MethodInfo method in methods)
+                    {
+                        var del = (HandleEvent)Delegate.CreateDelegate(typeof(HandleEvent), method);
+                        foreach (CustomAttributeData attributeData in method.CustomAttributes)
+                        {
+                            EventCodes eventCode = (EventCodes)attributeData.ConstructorArguments[0].Value;
+                            if (!_eventHandlers.ContainsKey(eventCode))
+                            {
+                                _eventHandlers.Add(eventCode, new List<HandleEvent>());
+                            }
+                            _eventHandlers[eventCode].Add(del);
+                        }
                     }
-                    _eventHandlers[eventCode].Add(del);
+
+                    methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
+                                                                      .SelectMany(t => t.GetMethods())
+                                                                      .Where(m => m.GetCustomAttributes(typeof(OperationHandler), false).Length > 0)
+                                                                      .ToArray()).ToArray();
+                    foreach (MethodInfo method in methods)
+                    {
+                        var del = (HandleOperation)Delegate.CreateDelegate(typeof(HandleOperation), method);
+                        foreach (CustomAttributeData attributeData in method.CustomAttributes)
+                        {
+                            OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
+                            if (!_operationHandlers.ContainsKey(opCode))
+                            {
+                                _operationHandlers.Add(opCode, new List<HandleOperation>());
+                            }
+                            _operationHandlers[opCode].Add(del);
+                        }
+                    }
+
+                    // Technically not initialized but everything after this is internal only
+                    _initialized = true;
                 }
             }
-
-            methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
-                                                              .SelectMany(t => t.GetMethods())
-                                                              .Where(m => m.GetCustomAttributes(typeof(OperationHandler), false).Length > 0)
-                                                              .ToArray()).ToArray();
-            foreach (MethodInfo method in methods)
-            {
-                var del = (HandleOperation)Delegate.CreateDelegate(typeof(HandleOperation), method);
-                foreach (CustomAttributeData attributeData in method.CustomAttributes)
-                {
-                    OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
-                    if (!_operationHandlers.ContainsKey(opCode))
-                    {
-                        _operationHandlers.Add(opCode, new List<HandleOperation>());
-                    }
-                    _operationHandlers[opCode].Add(del);
-                }
-            }
-
-            new Thread(delegate ()
-            {
-                this.CreateListener();
-            }).Start();
         }
 
         private static readonly Lazy<PacketHandler> lazy = new Lazy<PacketHandler>(() => new PacketHandler());

@@ -26,6 +26,7 @@ namespace LootUI
                 _processor = new AlbionProcessor.AlbionProcessor();
                 
                 LootDB.Instance.LootAddedToPlayer += HandleLootAddedToPlayer;
+                CharacterDB.Instance.PlayerAdded += Instance_PlayerAdded;
 
                 trvPlayers.ItemsSource = players;
             }
@@ -33,6 +34,14 @@ namespace LootUI
             {
                 log.Error(ex.StackTrace);
             }
+        }
+
+        private void Instance_PlayerAdded(object sender, PlayerEventArgs e)
+        {
+            this.Dispatcher.Invoke(new Action(() =>
+            {
+                LootLog.Text += $"{e.Player.Name} seen\r\n";
+            }));
         }
 
         private void HandleLootAddedToPlayer(object sender, PlayerLootEventArgs plea)
