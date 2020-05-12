@@ -10,6 +10,7 @@ namespace AlbionProcessor
 
         public AlbionProcessor()
         {
+            PacketHandler.Instance.Initialize();
             LootDB.Instance.LootAddedToPlayer += PlayerLootAdded;
         }
 

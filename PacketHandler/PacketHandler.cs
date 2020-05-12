@@ -32,13 +32,25 @@ namespace AlbionProcessor
         private Dictionary<EventCodes, List<HandleEvent>> _eventHandlers = new Dictionary<EventCodes, List<HandleEvent>>();
         private Dictionary<OperationCodes, List<HandleOperation>> _operationHandlers = new Dictionary<OperationCodes, List<HandleOperation>>();
 
+        private bool _initialized = false;
+
         public PacketHandler()
         {
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            if(_initialized)
+            {
+                return;
+            }
+
             var methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
                                                                   .SelectMany(t => t.GetMethods())
                                                                   .Where(m => m.GetCustomAttributes(typeof(AlbionMarshaller.EventHandler), false).Length > 0)
                                                                   .ToArray()).ToArray();
-            foreach(MethodInfo method in methods)
+            foreach (MethodInfo method in methods)
             {
                 var del = (HandleEvent)Delegate.CreateDelegate(typeof(HandleEvent), method);
                 foreach (CustomAttributeData attributeData in method.CustomAttributes)
@@ -69,7 +81,7 @@ namespace AlbionProcessor
                     _operationHandlers[opCode].Add(del);
                 }
             }
-            
+
             new Thread(delegate ()
             {
                 this.CreateListener();
