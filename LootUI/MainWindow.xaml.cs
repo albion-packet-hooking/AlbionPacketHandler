@@ -1,10 +1,17 @@
 ﻿using AlbionMarshaller.MemoryStorage;
 using AlbionMarshaller.Model;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace LootUI
 {
@@ -26,22 +33,13 @@ namespace LootUI
                 _processor = new AlbionProcessor.AlbionProcessor();
                 
                 LootDB.Instance.LootAddedToPlayer += HandleLootAddedToPlayer;
-                CharacterDB.Instance.PlayerAdded += Instance_PlayerAdded;
 
-                trvPlayers.ItemsSource = players;
+                trvPlayerLoot.ItemsSource = players;
             }
             catch (Exception ex)
             {
                 log.Error(ex.StackTrace);
             }
-        }
-
-        private void Instance_PlayerAdded(object sender, PlayerEventArgs e)
-        {
-            this.Dispatcher.Invoke(new Action(() =>
-            {
-                LootLog.Text += $"{e.Player.Name} seen\r\n";
-            }));
         }
 
         private void HandleLootAddedToPlayer(object sender, PlayerLootEventArgs plea)
@@ -50,8 +48,9 @@ namespace LootUI
             {
                 Loot loot = plea.Loot;
                 Player player = plea.Player;
-                LootLog.Text += $"{player.Name} looted {loot.Quantity}x{loot.LongName} from {loot.BodyName} at {loot.PickupTime}\r\n";
-
+                Run run = new Run();
+                run.Text = $"{player.Name} looted {loot.Quantity}x{loot.LongName} from {loot.BodyName} at {loot.PickupTime}\r\n";
+                LootLog.Inlines.Add(run);
                 
                 PlayerView pv = players.FirstOrDefault(p => p.Name == player.Name);
                 if (pv == null && player.Id == -1000)
@@ -75,10 +74,11 @@ namespace LootUI
 
         private void ScrollViewer_ScrollChanged(Object sender, ScrollChangedEventArgs e)
         {
+            ScrollViewer scroller = sender as ScrollViewer;
             // User scroll event : set or unset auto-scroll mode
             if (e.ExtentHeightChange == 0)
             {   // Content unchanged : user scroll event
-                if (LootScroller.VerticalOffset == LootScroller.ScrollableHeight)
+                if (scroller.VerticalOffset == scroller.ScrollableHeight)
                 {   // Scroll bar is in bottom
                     // Set auto-scroll mode
                     AutoScroll = true;
@@ -94,7 +94,7 @@ namespace LootUI
             if (AutoScroll && e.ExtentHeightChange != 0)
             {   // Content changed and auto-scroll mode set
                 // Autoscroll
-                LootScroller.ScrollToVerticalOffset(LootScroller.ExtentHeight);
+                scroller.ScrollToVerticalOffset(scroller.ExtentHeight);
             }
         }
 
@@ -106,20 +106,31 @@ namespace LootUI
             Environment.Exit(0);
         }
 
-        private void SaveLoot_Click(object sender, RoutedEventArgs e)
-        {
-            //_logger.SaveLootsToFile();
-        }
-
         private void ClearLoot_Click(object sender, RoutedEventArgs e)
         {
-            //_service.Players.Clear();
-            LootLog.Text = "";
+            LootLog.Inlines.Clear();
+            players.Clear();
         }
 
         private void SaveFilter_Click(object sender, RoutedEventArgs e)
         {
             //_service.FilterString = this.Filter.Text;
+        }
+
+        private void Filter_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string text = (e.Source as TextBox).Text;
+            foreach(PlayerView player in players)
+            {
+                if(player.Text.ToLower().Contains(text.ToLower()))
+                {
+                    player.IsHidden = Visibility.Visible;
+                }
+                else
+                {
+                    player.IsHidden = Visibility.Hidden;
+                }
+            }
         }
     }
 }

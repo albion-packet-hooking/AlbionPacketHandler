@@ -18,12 +18,11 @@ namespace AlbionProcessor
             Guid guid = parameters.ContainsKey(7) ? new Guid((byte[])parameters[7]) : new Guid();
             string guildName = parameters.ContainsKey(8) ? parameters[8].ToString() : "";
             string alliance = parameters.ContainsKey(43) ? parameters[43].ToString() : "";
-
+            
             Player player = CharacterDB.Instance.FindByName(playerName);
             if (player == null)
             {
                 player = new Player() { Name = playerName, Guild = guildName, Alliance = alliance, Id = playerId, Loots = new List<Loot>(), Guid = guid };
-                CharacterDB.Instance.AddPlayer(player);
             }
             else
             {
@@ -67,16 +66,47 @@ namespace AlbionProcessor
                     equipStr += itemName + " | ";
                 }
             }
+            
+            CharacterDB.Instance.AddPlayer(player);            
 
-            log.Info($"{playerName}(CharType={CharacterDB.Instance.ClassifyCharacter(player)}) = {equipStr}");
+            if (!"DUNE".Equals(player.Alliance))
+            {
+                log.Info($"{playerName}(CharType={player.CharacterType}) = {equipStr}");
+            }
         }
-
+        
         [AlbionMarshaller.EventHandler(EventCodes.Leave)]
         public static void OnLeave(Dictionary<byte, object> parameters, ILog log)
         {
-            int characterID = int.Parse(parameters[0].ToString());
-            Player player = CharacterDB.Instance.FindByID(characterID);
-            CharacterDB.Instance.RemovePlayer(player);
+            int objectId = int.Parse(parameters[0].ToString());
+            Player player = CharacterDB.Instance.FindByID(objectId);
+            if (player != null)
+            {
+                CharacterDB.Instance.RemovePlayer(player);
+                return;
+            }
+
+            Mob mob = MobDB.Instance.FindMob(objectId);
+            if(mob != null)
+            {
+                MobDB.Instance.RemoveMob(objectId);
+                return;
+            }
+
+            Resource resource = ResourceDB.Instance.FindResource(objectId);
+            if(resource != null)
+            {
+                ResourceDB.Instance.RemoveResource(objectId);
+                return;
+            }
+        }
+
+        [AlbionMarshaller.EventHandler(EventCodes.JoinFinished)]
+        public static void OnJoin(Dictionary<byte, object> parameters, ILog log)
+        {
+            CharacterDB.Instance.Clear();
+            MobDB.Instance.Clear();
+            ResourceDB.Instance.Clear();
         }
     }
 }

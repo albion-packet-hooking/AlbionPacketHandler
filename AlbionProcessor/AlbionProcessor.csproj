@@ -101,6 +101,7 @@
   <ItemGroup>
     <Compile Include="Handlers\ChestDropEventHandler.cs" />
     <Compile Include="Handlers\LootEventHandler.cs" />
+    <Compile Include="Handlers\ResourceHandler.cs" />
     <Compile Include="Handlers\SelfLootLogger.cs" />
     <Compile Include="AlbionProcessor.cs" />
     <Compile Include="Handlers\CharacterHandler.cs" />

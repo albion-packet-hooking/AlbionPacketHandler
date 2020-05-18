@@ -19,36 +19,6 @@ namespace AlbionMarshaller.MemoryStorage
         public event System.EventHandler<PlayerEventArgs> PlayerAdded;
         public event System.EventHandler<PlayerEventArgs> PlayerRemoved;
 
-        private Dictionary<ItemSlot, Dictionary<String, CharacterType>> classifiers = new Dictionary<ItemSlot, Dictionary<String, CharacterType>>
-        {
-            {
-                ItemSlot.MainHand,
-                    new Dictionary<String, CharacterType>
-                        {
-                            { "naturestaff", CharacterType.Healer },
-                            { "holystaff", CharacterType.Healer },
-                            { "hammer", CharacterType.Tank },
-                            { "mace", CharacterType.Tank },
-                            { "quarterstaff", CharacterType.Tank },
-                            { "bow", CharacterType.RangedDPS },
-                            { "crossbow", CharacterType.RangedDPS },
-                            { "sword", CharacterType.MeleeDPS },
-                            { "axe", CharacterType.MeleeDPS },
-                            { "dagger", CharacterType.MeleeDPS },
-                            { "spear", CharacterType.MeleeDPS },
-                            { "firestaff", CharacterType.MagicDPS },
-                            { "froststaff", CharacterType.MagicDPS },
-                            { "cursestaff", CharacterType.Support },
-                            { "arcanestaff", CharacterType.Support },
-                            { "sickle", CharacterType.FiberGather },
-                            { "pickaxe", CharacterType.OreGather },
-                            { "woodaxe", CharacterType.WoodGather },
-                            { "stonehammer", CharacterType.StoneGather },
-                            { "fishing", CharacterType.Fisher },
-                        }
-            }
-        };
-
         private Dictionary<String, Player> characters = new Dictionary<String, Player>();
         private CharacterDB()
         {
@@ -93,9 +63,9 @@ namespace AlbionMarshaller.MemoryStorage
 
         public void AddPlayer(Player player)
         {
-            if(!PlayerExists(player.Name))
+            PlayerAdded?.Invoke(this, new PlayerEventArgs(player));
+            if (!PlayerExists(player.Name))
             {
-                PlayerAdded?.Invoke(this, new PlayerEventArgs(player));
                 characters.Add(player.Name, player);
             }
         }
@@ -103,29 +73,15 @@ namespace AlbionMarshaller.MemoryStorage
         // Don't actually remove the player, just inform others they have left
         public void RemovePlayer(Player player)
         {
-            if (player != null && !PlayerExists(player.Name))
+            if (player != null && PlayerExists(player.Name))
             {
                 PlayerRemoved?.Invoke(this, new PlayerEventArgs(player));
             }
         }
 
-        public CharacterType ClassifyCharacter(Player player)
+        public void Clear()
         {
-            foreach (ItemSlot slot in classifiers.Keys)
-            {
-                Dictionary<String, CharacterType> slotClassifiers = classifiers[slot];
-                if (player.Gear.ContainsKey(slot))
-                {
-                    JObject item = player.Gear[slot];
-                    string subtype = item["Subtype"].ToString();
-                    if (slotClassifiers.ContainsKey(subtype))
-                    {
-                        return slotClassifiers[subtype];
-                    }
-                }
-            }
-
-            return CharacterType.Unknown;
+            PlayerRemoved?.Invoke(this, new PlayerEventArgs(new Player() { Id=-1 }));
         }
     }
 }

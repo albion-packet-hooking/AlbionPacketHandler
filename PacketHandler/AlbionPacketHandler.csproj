@@ -63,10 +63,15 @@
     <Compile Include="EventCodes.cs" />
     <Compile Include="MemoryStorage\CharacterDB.cs" />
     <Compile Include="MemoryStorage\ItemDB.cs" />
+    <Compile Include="MemoryStorage\Localization.cs" />
     <Compile Include="MemoryStorage\LootDB.cs" />
+    <Compile Include="MemoryStorage\ResourceDB.cs" />
+    <Compile Include="MemoryStorage\MobDB.cs" />
     <Compile Include="Model\Container.cs" />
     <Compile Include="Model\Loot.cs" />
+    <Compile Include="Model\Mob.cs" />
     <Compile Include="Model\Player.cs" />
+    <Compile Include="Model\Resource.cs" />
     <Compile Include="OperationCodes.cs" />
     <Compile Include="PacketHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -78,6 +83,16 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Resources\localization.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\mobs.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\resources.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
