@@ -26,4 +26,5 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: MSBuild
+      working-directory: AlbionPacketHandler
       run: msbuild LootLogger.sln
