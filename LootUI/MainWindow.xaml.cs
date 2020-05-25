@@ -1,17 +1,13 @@
 ﻿using AlbionMarshaller.MemoryStorage;
 using AlbionMarshaller.Model;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace LootUI
 {
@@ -34,7 +30,8 @@ namespace LootUI
                 
                 LootDB.Instance.LootAddedToPlayer += HandleLootAddedToPlayer;
 
-                trvPlayerLoot.ItemsSource = players;
+                trvPlayerLoot.ItemsSource = CollectionViewSource.GetDefaultView(players);
+                (trvPlayerLoot.ItemsSource as ICollectionView).Filter = new Predicate<object>(FilterLoot);
             }
             catch (Exception ex)
             {
@@ -42,7 +39,18 @@ namespace LootUI
             }
         }
 
-        private void HandleLootAddedToPlayer(object sender, PlayerLootEventArgs plea)
+        public bool FilterLoot(object sender)
+        {
+            PlayerView player = sender as PlayerView;
+            string text = (Filter as TextBox).Text;
+            if (player.Text.ToLower().Contains(text.ToLower()))
+            {
+                return false;
+            }
+            return true;
+        }
+
+            private void HandleLootAddedToPlayer(object sender, PlayerLootEventArgs plea)
         {
             this.Dispatcher.Invoke(new Action(() =>
             {
@@ -119,17 +127,9 @@ namespace LootUI
 
         private void Filter_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string text = (e.Source as TextBox).Text;
-            foreach(PlayerView player in players)
+            if(trvPlayerLoot != null && trvPlayerLoot.ItemsSource != null)
             {
-                if(player.Text.ToLower().Contains(text.ToLower()))
-                {
-                    player.IsHidden = Visibility.Visible;
-                }
-                else
-                {
-                    player.IsHidden = Visibility.Hidden;
-                }
+                (trvPlayerLoot.ItemsSource as ICollectionView).Refresh();
             }
         }
     }

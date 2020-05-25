@@ -50,6 +50,14 @@ namespace AlbionProcessor
                         this.CreateListener();
                     }).Start();
 
+                    var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+                    var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+
+                    var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
+                    var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+
+                    toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
+
                     var methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
                                                                           .SelectMany(t => t.GetMethods())
                                                                           .Where(m => m.GetCustomAttributes(typeof(AlbionMarshaller.EventHandler), false).Length > 0)

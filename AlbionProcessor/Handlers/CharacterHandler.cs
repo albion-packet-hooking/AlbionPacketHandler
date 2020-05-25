@@ -67,12 +67,7 @@ namespace AlbionProcessor
                 }
             }
             
-            CharacterDB.Instance.AddPlayer(player);            
-
-            if (!"DUNE".Equals(player.Alliance))
-            {
-                log.Info($"{playerName}(CharType={player.CharacterType}) = {equipStr}");
-            }
+            CharacterDB.Instance.AddPlayer(player);      
         }
         
         [AlbionMarshaller.EventHandler(EventCodes.Leave)]
