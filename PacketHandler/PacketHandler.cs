@@ -174,7 +174,14 @@ namespace AlbionProcessor
             {
                 foreach (HandleEvent eventHandler in _eventHandlers[eventCode])
                 {
-                    eventHandler(parameters, log);
+                    try
+                    {
+                        eventHandler(parameters, log);
+                    }
+                    catch(Exception ex)
+                    {
+                        log.Error(ex);
+                    }
                 }
             }
         }
@@ -196,7 +203,14 @@ namespace AlbionProcessor
                 {
                     foreach (HandleOperation opHandler in _operationHandlers[opCode])
                     {
-                        opHandler(parameters, log);
+                        try
+                        {
+                            opHandler(parameters, log);
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Error(ex);
+                        }
                     }
                 }
             }
@@ -220,7 +234,14 @@ namespace AlbionProcessor
                 {
                     foreach (HandleOperation opHandler in _operationHandlers[opCode])
                     {
-                        opHandler(parameters, log);
+                        try
+                        {
+                            opHandler(parameters, log);
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Error(ex);
+                        }
                     }
                 }
             }
