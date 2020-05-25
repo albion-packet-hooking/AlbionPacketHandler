@@ -26,5 +26,4 @@ jobs:
 
     # Runs a single command using the runners shell
     - name: MSBuild
-      working-directory: .
-      run: msbuild LootLogger.sln
+      run: msbuild $Env:GITHUB_WORKSPACE\LootUI\LootUI.csproj
