@@ -20,6 +20,7 @@ namespace LootUI
         private AlbionProcessor.AlbionProcessor _processor = null;
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private ObservableCollection<PlayerView> players = new ObservableCollection<PlayerView>();
+        private bool _filterChanged = false;
 
         public MainWindow()
         {
@@ -43,11 +44,17 @@ namespace LootUI
         {
             PlayerView player = sender as PlayerView;
             string text = (Filter as TextBox).Text;
+
+            if(!_filterChanged || text == "")
+            {
+                return true;
+            }
+
             if (player.Text.ToLower().Contains(text.ToLower()))
             {
-                return false;
+                return true;
             }
-            return true;
+            return false;
         }
 
             private void HandleLootAddedToPlayer(object sender, PlayerLootEventArgs plea)
@@ -129,6 +136,7 @@ namespace LootUI
         {
             if(trvPlayerLoot != null && trvPlayerLoot.ItemsSource != null)
             {
+                _filterChanged = true;
                 (trvPlayerLoot.ItemsSource as ICollectionView).Refresh();
             }
         }
