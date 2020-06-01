@@ -20,7 +20,7 @@ namespace AlbionProcessor
             Player player = plea.Player;
             string path = Path.Combine(Directory.GetCurrentDirectory(), "aolootlog", PacketHandler.Instance.LogTimer + ".csv");
             Directory.CreateDirectory(Path.GetDirectoryName(path));
-            string logMessage = $"[{item.PickupTime.ToString()}] {player.Name} has looted {item.Quantity}x {item.ItemName} from {item.BodyName}";
+            string logMessage = $"[{item.LocalPickupTime.ToString()}] {player.Name} has looted {item.Quantity}x {item.ItemName} from {item.BodyName}";
 
             string alliance = "";
             if(player.Alliance != null)
@@ -38,7 +38,7 @@ namespace AlbionProcessor
             {
                 quality = item.ItemName.Split('@')[1];
             }
-            string csvMessage = $"{item.PickupTime.ToString()},{alliance},{guild},{player.Name},{item.ItemName},{item.LongName},{quality},{item.Quantity},{item.BodyName}";
+            string csvMessage = $"{item.UtcPickupTime.ToString()},{alliance},{guild},{player.Name},{item.ItemName},{item.LongName},{quality},{item.Quantity},{item.BodyName}";
 
             log.Info(logMessage);
             using (StreamWriter streamWriter = File.AppendText(path))

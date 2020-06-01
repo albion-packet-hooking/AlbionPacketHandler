@@ -12,7 +12,10 @@ namespace AlbionMarshaller.Model
         public int ItemRefId { get; set; }
 
         [JsonProperty]
-        public DateTime PickupTime { get; set; }
+        public DateTime LocalPickupTime { get; set; }
+
+        [JsonProperty]
+        public DateTime UtcPickupTime { get; set; }
 
         [JsonProperty]
         public string BodyName { get; set; }
@@ -29,12 +32,12 @@ namespace AlbionMarshaller.Model
 
         public string GetLine()
         {
-            return String.Join(", ", PickupTime.ToString("HH:mm:ss"), LooterName, Quantity, ItemName, BodyName)+"\\n";
+            return String.Join(", ", LocalPickupTime.ToString("HH:mm:ss"), LooterName, Quantity, ItemName, BodyName)+"\\n";
         }
 
         public override string ToString()
         {
-            return String.Join(", ", PickupTime.ToString("HH:mm:ss"), LooterName, Quantity, LongName, BodyName);
+            return String.Join(", ", LocalPickupTime.ToString("HH:mm:ss"), LooterName, Quantity, LongName, BodyName);
         }
     }
 }

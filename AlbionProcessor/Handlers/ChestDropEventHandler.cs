@@ -173,7 +173,18 @@ namespace AlbionProcessor
                 }
             }
 
-            LootDB.Instance.AddLoot(new Loot() { ObjectID = objectID, ItemRefId = itemID, ItemName = item["UniqueName"].ToString(), LongName = itemName, Quantity = quantity, PickupTime = DateTime.Now.ToLocalTime() });
+            LootDB.Instance.AddLoot(
+                new Loot()
+                {
+                    ObjectID = objectID,
+                    ItemRefId = itemID,
+                    ItemName = item["UniqueName"].ToString(),
+                    LongName = itemName,
+                    Quantity = quantity,
+                    LocalPickupTime = DateTime.Now.ToLocalTime(),
+                    UtcPickupTime = DateTime.UtcNow
+                }
+            );
         }
     }
 }

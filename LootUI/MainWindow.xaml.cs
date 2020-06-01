@@ -64,7 +64,7 @@ namespace LootUI
                 Loot loot = plea.Loot;
                 Player player = plea.Player;
                 Run run = new Run();
-                run.Text = $"{player.Name} looted {loot.Quantity}x{loot.LongName} from {loot.BodyName} at {loot.PickupTime}\r\n";
+                run.Text = $"{player.Name} looted {loot.Quantity}x{loot.LongName} from {loot.BodyName} at {loot.LocalPickupTime}\r\n";
                 LootLog.Inlines.Add(run);
                 
                 PlayerView pv = players.FirstOrDefault(p => p.Name == player.Name);

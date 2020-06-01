@@ -55,7 +55,8 @@ namespace AlbionProcessor
                         ItemRefId = itemTypeID,
                         LooterName = playerName,
                         Quantity = quantity,
-                        PickupTime = DateTime.Now.ToLocalTime(),
+                        LocalPickupTime = DateTime.Now.ToLocalTime(),
+                        UtcPickupTime = DateTime.UtcNow,
                         ItemName = item["UniqueName"].ToString(),
                         LongName = itemName,
                         BodyName = container.Owner
@@ -132,7 +133,8 @@ namespace AlbionProcessor
                 ItemName = item["UniqueName"].ToString(),
                 LongName = itemName,
                 Quantity = int.Parse(quantity.ToString()),
-                PickupTime = DateTime.UtcNow.ToLocalTime(),
+                LocalPickupTime = DateTime.UtcNow.ToLocalTime(),
+                UtcPickupTime = DateTime.UtcNow,
                 BodyName = deadPlayer,
                 LooterName = looter
             };
