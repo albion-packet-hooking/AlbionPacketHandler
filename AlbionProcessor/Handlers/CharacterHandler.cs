@@ -97,11 +97,31 @@ namespace AlbionProcessor
         }
 
         [AlbionMarshaller.EventHandler(EventCodes.JoinFinished)]
-        public static void OnJoin(Dictionary<byte, object> parameters, ILog log)
+        public static void OnJoinFinished(Dictionary<byte, object> parameters, ILog log)
         {
             CharacterDB.Instance.Clear();
             MobDB.Instance.Clear();
             ResourceDB.Instance.Clear();
+        }
+
+        [OperationHandler(OperationCodes.Join, OperationType.Response)]
+        public static void OnJoin(Dictionary<byte, object> parameters, ILog log)
+        {
+            if (parameters.ContainsKey(8))
+            {
+                log.Debug($"New Location {parameters[8]}");
+                CharacterDB.Instance.CurrentLocation = parameters[8].ToString();
+            }
+        }
+
+        [OperationHandler(OperationCodes.ChangeCluster, OperationType.Response)]
+        public static void OnClusterChange(Dictionary<byte, object> parameters, ILog log)
+        {
+            if (parameters.ContainsKey(0))
+            {
+                log.Debug($"New Location {parameters[0]}");
+                CharacterDB.Instance.CurrentLocation = parameters[0].ToString();
+            }
         }
     }
 }

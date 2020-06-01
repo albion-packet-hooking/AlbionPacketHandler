@@ -36,6 +36,8 @@ namespace AlbionMarshaller.MemoryStorage
 
         public Player Self { get; set; } = new Player() { Id = -1000, Name = "OWN_GOD_DAMN_PLAYER" };
 
+        public string CurrentLocation { get; set; } = "-1";
+
         public bool PlayerExists(String characterName)
         {
             return characters.ContainsKey(characterName);

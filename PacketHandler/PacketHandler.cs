@@ -30,7 +30,8 @@ namespace AlbionProcessor
         public ConcurrentDictionary<String, int> triggeredOperations = new ConcurrentDictionary<string, int>();
 
         private Dictionary<EventCodes, List<HandleEvent>> _eventHandlers = new Dictionary<EventCodes, List<HandleEvent>>();
-        private Dictionary<OperationCodes, List<HandleOperation>> _operationHandlers = new Dictionary<OperationCodes, List<HandleOperation>>();
+        private Dictionary<OperationCodes, List<HandleOperation>> _requestHandlers = new Dictionary<OperationCodes, List<HandleOperation>>();
+        private Dictionary<OperationCodes, List<HandleOperation>> _responseHandlers = new Dictionary<OperationCodes, List<HandleOperation>>();
 
         private bool _initialized = false;
 
@@ -86,11 +87,23 @@ namespace AlbionProcessor
                         foreach (CustomAttributeData attributeData in method.CustomAttributes)
                         {
                             OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
-                            if (!_operationHandlers.ContainsKey(opCode))
+                            OperationType opType = (OperationType)attributeData.ConstructorArguments[1].Value;
+                            if (opType == OperationType.Request)
                             {
-                                _operationHandlers.Add(opCode, new List<HandleOperation>());
+                                if (!_requestHandlers.ContainsKey(opCode))
+                                {
+                                    _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                }
+                                _requestHandlers[opCode].Add(del);
                             }
-                            _operationHandlers[opCode].Add(del);
+                            else
+                            {
+                                if (!_responseHandlers.ContainsKey(opCode))
+                                {
+                                    _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                }
+                                _responseHandlers[opCode].Add(del);
+                            }
                         }
                     }
 
@@ -189,6 +202,7 @@ namespace AlbionProcessor
         public void OnResponse(byte operationCode, short returnCode, Dictionary<byte, object> parameters)
         {
             int iCode = 0;
+            LogManager.GetLogger("RAW").Debug(parameters);
             if (int.TryParse(parameters[253].ToString(), out iCode))
             {
                 OperationCodes opCode = (OperationCodes)iCode;
@@ -199,9 +213,9 @@ namespace AlbionProcessor
                 string loggerName = "Response." + opCode.ToString();
                 ILog log = LogManager.GetLogger(loggerName);
                 log.Debug(parameters);
-                if (_operationHandlers.ContainsKey(opCode))
+                if (_responseHandlers.ContainsKey(opCode))
                 {
-                    foreach (HandleOperation opHandler in _operationHandlers[opCode])
+                    foreach (HandleOperation opHandler in _responseHandlers[opCode])
                     {
                         try
                         {
@@ -230,9 +244,9 @@ namespace AlbionProcessor
                 ILog log = LogManager.GetLogger(loggerName);
                 log.Debug(parameters);
 
-                if (_operationHandlers.ContainsKey(opCode))
+                if (_requestHandlers.ContainsKey(opCode))
                 {
-                    foreach (HandleOperation opHandler in _operationHandlers[opCode])
+                    foreach (HandleOperation opHandler in _requestHandlers[opCode])
                     {
                         try
                         {
@@ -270,7 +284,7 @@ namespace AlbionProcessor
 
                 device.OnPacketArrival += new PacketArrivalEventHandler(PacketHandle);
                 device.Open(DeviceMode.Promiscuous, 1000);
-                device.Filter = "ip and udp and port 5056";
+                device.Filter = "ip and udp and (port 5056 or port 5055 or port 4535)";
                 if (device.LinkType != LinkLayers.Ethernet)
                 {
                     device.Close();
@@ -291,10 +305,7 @@ namespace AlbionProcessor
             }
 
             Protocol16 protocol16 = new Protocol16();
-            if (udpPacket.SourcePort != 5056 && udpPacket.DestinationPort != 5056)
-            {
-                return;
-            }
+            log.Debug($"sourcePort={udpPacket.SourcePort} destPort={udpPacket.DestinationPort}");
             BinaryReader binaryReader = new BinaryReader(new MemoryStream(udpPacket.PayloadData));
             try
             {
@@ -338,6 +349,7 @@ namespace AlbionProcessor
                         {
                             case 2:
                                 {
+                                    log.Debug($"Request Packet Data: {System.Convert.ToBase64String(udpPacket.PayloadData)}");
                                     OperationRequest requestData = protocol16.DeserializeOperationRequest(payload);
                                     Instance.OnRequest(requestData.OperationCode, requestData.Parameters);
                                     goto IL_1E7;

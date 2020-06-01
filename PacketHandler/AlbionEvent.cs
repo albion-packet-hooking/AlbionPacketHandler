@@ -14,13 +14,21 @@ namespace AlbionMarshaller
         }
     }
 
+    public enum OperationType
+    {
+        Request = 0,
+        Response = 1
+    }
+
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class OperationHandler : Attribute
     {
         public OperationCodes OpCode { get; set; }
-        public OperationHandler(OperationCodes opCode)
+        public OperationType OpType { get; set; }
+        public OperationHandler(OperationCodes opCode, OperationType opType = OperationType.Request)
         {
             OpCode = opCode;
+            OpType = opType;
         }
     }
 
@@ -42,6 +50,27 @@ namespace AlbionMarshaller
             else if (intArray is int[])
             {
                 return (int[])intArray;
+            }
+            throw new NotImplementedException("Unknown array type");
+        }
+
+        protected static long[] ConvertToLong(object array)
+        {
+            if (array is byte[])
+            {
+                return Array.ConvertAll((byte[])array, b => (long)b);
+            }
+            else if (array is short[])
+            {
+                return Array.ConvertAll((short[])array, b => (long)b);
+            }
+            else if (array is int[])
+            {
+                return Array.ConvertAll((int[])array, b => (long)b);
+            }
+            else if (array is long[])
+            {
+                return (long[])array;
             }
             throw new NotImplementedException("Unknown array type");
         }

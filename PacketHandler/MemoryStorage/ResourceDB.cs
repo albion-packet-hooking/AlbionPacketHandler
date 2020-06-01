@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -58,25 +59,32 @@ namespace AlbionMarshaller.MemoryStorage
         private ResourceDB()
         {
             log.Info("Loading resources into memory");
-            XDocument mobDoc = XDocument.Parse(File.ReadAllText(@"Resources\resources.xml"));
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "AlbionMarshaller.Resources.resources.xml";
 
-            int index = 0;
-            foreach (XElement topResource in mobDoc.Root.Element("Harvestables").Elements("Harvestable"))
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                string name = topResource.Attribute("name").Value;
-                string resource = null;
-                if (topResource.Attribute("resource") != null)
+                XDocument mobDoc = XDocument.Parse(reader.ReadToEnd());
+
+                int index = 0;
+                foreach (XElement topResource in mobDoc.Root.Element("Harvestables").Elements("Harvestable"))
                 {
-                    resource = topResource.Attribute("resource").Value;
-                    ResourceTypes.Add(resource);
+                    string name = topResource.Attribute("name").Value;
+                    string resource = null;
+                    if (topResource.Attribute("resource") != null)
+                    {
+                        resource = topResource.Attribute("resource").Value;
+                        ResourceTypes.Add(resource);
+                    }
+                    ResourceType resType = new ResourceType() { Type = resource, Name = name };
+                    resourceDictionary.Add(index++, resType);
+                    resourceDictionaryByName.Add(name, resType);
+                    //foreach (XElement subResource in topResource.Elements("ResourceTier"))
+                    //{
+                    //    int tier = int.Parse(subResource.Attribute("value").Value);
+                    //}
                 }
-                ResourceType resType = new ResourceType() { Type = resource, Name = name };
-                resourceDictionary.Add(index++, resType);
-                resourceDictionaryByName.Add(name, resType);
-                //foreach (XElement subResource in topResource.Elements("ResourceTier"))
-                //{
-                //    int tier = int.Parse(subResource.Attribute("value").Value);
-                //}
             }
             log.Info("Finished loading resources into memory");
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -22,13 +23,20 @@ namespace AlbionMarshaller.MemoryStorage
         private Dictionary<string, string> _nameToTranslation = new Dictionary<string, string>();
         private Localization()
         {
-            XDocument localizationDoc = XDocument.Parse(File.ReadAllText(@"Resources\localization.xml"));
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "AlbionMarshaller.Resources.localization.xml";
 
-            foreach (XElement loc in localizationDoc.Root.Descendants("tu"))
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                string name = loc.Attribute("tuid").Value;
-                string enUS = loc.Elements("tuv").Where(x => x.Attribute(XNamespace.Xml + "lang").Value == "EN-US").Select(x => x.Value).FirstOrDefault();
-                _nameToTranslation.Add(name, enUS);
+                XDocument localizationDoc = XDocument.Parse(reader.ReadToEnd());
+
+                foreach (XElement loc in localizationDoc.Root.Descendants("tu"))
+                {
+                    string name = loc.Attribute("tuid").Value;
+                    string enUS = loc.Elements("tuv").Where(x => x.Attribute(XNamespace.Xml + "lang").Value == "EN-US").Select(x => x.Value).FirstOrDefault();
+                    _nameToTranslation.Add(name, enUS);
+                }
             }
         }
 

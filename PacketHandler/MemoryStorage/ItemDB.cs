@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace AlbionMarshaller.MemoryStorage
 {
@@ -10,11 +11,18 @@ namespace AlbionMarshaller.MemoryStorage
         private Dictionary<int, JObject> itemDictionary = new Dictionary<int, JObject>();
         private ItemDB()
         {
-            JArray itemArray = JArray.Parse(File.ReadAllText(@"Resources\items.json"));
-            foreach (JObject item in itemArray)
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "AlbionMarshaller.Resources.items.json";
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            using (StreamReader reader = new StreamReader(stream))
             {
-                int id = int.Parse(item["Index"].ToString());
-                itemDictionary.Add(id, item);
+                JArray itemArray = JArray.Parse(reader.ReadToEnd());
+                foreach (JObject item in itemArray)
+                {
+                    int id = int.Parse(item["Index"].ToString());
+                    itemDictionary.Add(id, item);
+                }
             }
         }
 

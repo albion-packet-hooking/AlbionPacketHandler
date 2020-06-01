@@ -5,6 +5,7 @@ using log4net;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AlbionProcessor
 {
@@ -43,6 +44,11 @@ namespace AlbionProcessor
             }
 
             int[] itemIDs = Convert(parameters[3]);
+            if (container.Loot.Count < itemIDs.Length)
+            {
+                // Grow the list
+                container.Loot.AddRange(Enumerable.Repeat<Loot>(null, itemIDs.Length - container.Loot.Count));
+            }
 
             for (int index = 0; index < itemIDs.Length; index++)
             {
