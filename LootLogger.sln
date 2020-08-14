@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugLoggerUI", "DebugUI\De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlbionPacketHandler", "PacketHandler\AlbionPacketHandler.csproj", "{45106928-72F1-4A87-B00C-D752CB215CB1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameTimeStampTest", "GameTimeStampTest\GameTimeStampTest.csproj", "{EABB033F-9441-416E-8380-05D073E68207}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{45106928-72F1-4A87-B00C-D752CB215CB1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{45106928-72F1-4A87-B00C-D752CB215CB1}.Release|x86.ActiveCfg = Release|Any CPU
 		{45106928-72F1-4A87-B00C-D752CB215CB1}.Release|x86.Build.0 = Release|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Debug|x86.Build.0 = Debug|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Release|x86.ActiveCfg = Release|Any CPU
+		{EABB033F-9441-416E-8380-05D073E68207}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

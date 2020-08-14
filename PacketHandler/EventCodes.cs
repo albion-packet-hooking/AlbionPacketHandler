@@ -401,5 +401,6 @@
         NewHomeObject = 405,
         HideoutObjectUpdate = 406,
         UpdateInfamy = 407,
+        NewTunnel = 409,
     }
 }

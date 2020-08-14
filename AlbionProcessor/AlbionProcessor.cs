@@ -14,6 +14,11 @@ namespace AlbionProcessor
             LootDB.Instance.LootAddedToPlayer += PlayerLootAdded;
         }
 
+        public void Shutdown()
+        {
+            PacketHandler.Instance.Shutdown();
+        }
+
         private void PlayerLootAdded(object sender, PlayerLootEventArgs plea)
         {
             Loot item = plea.Loot;

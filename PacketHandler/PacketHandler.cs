@@ -261,6 +261,18 @@ namespace AlbionProcessor
             }
         }
 
+        public void Shutdown()
+        {
+            var allDevices = CaptureDeviceList.Instance;
+            for (int i = 0; i != allDevices.Count; i++)
+            {
+                ICaptureDevice device = allDevices[i];
+
+                device.StopCapture();
+                device.Close();
+            }
+        }
+
         private void CreateListener()
         {
             var allDevices = CaptureDeviceList.Instance;
@@ -298,14 +310,17 @@ namespace AlbionProcessor
         {
             Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             var udpPacket = packet.Extract<UdpPacket>();
+            var ipPacket = packet.Extract<IPPacket>();
 
             if (udpPacket == null)
             {
                 return;
             }
-
+            
+            //ILog plog = LogManager.GetLogger("Packet");
+            //plog.Debug(string.Format("{0}:{1}->{2}:{3}", ipPacket.SourceAddress, udpPacket.SourcePort, ipPacket.DestinationAddress, udpPacket.DestinationPort));
+            String hexPayloadData = Convert.ToBase64String(udpPacket.PayloadData);
             Protocol16 protocol16 = new Protocol16();
-            log.Debug($"sourcePort={udpPacket.SourcePort} destPort={udpPacket.DestinationPort}");
             BinaryReader binaryReader = new BinaryReader(new MemoryStream(udpPacket.PayloadData));
             try
             {
@@ -349,27 +364,36 @@ namespace AlbionProcessor
                         {
                             case 2:
                                 {
-                                    log.Debug($"Request Packet Data: {System.Convert.ToBase64String(udpPacket.PayloadData)}");
+                                    //ILog rlog = LogManager.GetLogger("Request");
+                                    //rlog.Debug(hexPayloadData);
                                     OperationRequest requestData = protocol16.DeserializeOperationRequest(payload);
                                     Instance.OnRequest(requestData.OperationCode, requestData.Parameters);
-                                    goto IL_1E7;
+                                    break;
                                 }
                             case 3:
                                 {
+                                    //ILog relog = LogManager.GetLogger("Response");
+                                    //relog.Debug(hexPayloadData);
                                     OperationResponse responseData = protocol16.DeserializeOperationResponse(payload);
                                     Instance.OnResponse(responseData.OperationCode, responseData.ReturnCode, responseData.Parameters);
-                                    goto IL_1E7;
+                                    break;
                                 }
                             case 4:
                                 {
+                                    //ILog elog = LogManager.GetLogger("Event");
+                                    //elog.Debug(hexPayloadData);
                                     EventData eventData = protocol16.DeserializeEventData(payload);
                                     Instance.OnEvent(eventData.Code, eventData.Parameters);
-                                    goto IL_1E7;
+                                    break;
                                 }
                             default:
+                                //ILog olog = LogManager.GetLogger("Other");
+                                //olog.Debug(hexPayloadData);
                                 binaryReader.BaseStream.Position += (long)operationLength;
-                                goto IL_1E7;
+                                break;
                         }
+                        payload.Close();
+                        goto IL_1E7;
                         IL_1CF:
                         binaryReader.BaseStream.Position += (long)(commandLength - commandHeaderLength);
                         IL_1E7:;

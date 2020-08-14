@@ -18,6 +18,7 @@ namespace AlbionMarshaller.MemoryStorage
     {
         public event System.EventHandler<PlayerEventArgs> PlayerAdded;
         public event System.EventHandler<PlayerEventArgs> PlayerRemoved;
+        public event System.EventHandler ZoneChanged;
 
         private Dictionary<String, Player> characters = new Dictionary<String, Player>();
         private CharacterDB()
@@ -41,6 +42,24 @@ namespace AlbionMarshaller.MemoryStorage
         public bool PlayerExists(String characterName)
         {
             return characters.ContainsKey(characterName);
+        }
+
+        public bool InCity()
+        {
+            if(CurrentLocation == "-1")
+            {
+                return false;
+            }
+            string location = WorldDB.Instance.GetDisplayName(CurrentLocation);
+            if(location.StartsWith("Martlock") ||
+                location.StartsWith("Fort Sterling") ||
+                location.StartsWith("Bridgewatch") ||
+                location.StartsWith("Thetford") ||
+                location.StartsWith("Lymhurst"))
+            {
+                return true;
+            }
+            return false;
         }
 
         public Player FindByID(int ID)
@@ -79,6 +98,12 @@ namespace AlbionMarshaller.MemoryStorage
             {
                 PlayerRemoved?.Invoke(this, new PlayerEventArgs(player));
             }
+        }
+
+        public void ChangeLocation(string newLocationID)
+        {
+            CurrentLocation = newLocationID;
+            ZoneChanged?.Invoke(this, null);
         }
 
         public void Clear()

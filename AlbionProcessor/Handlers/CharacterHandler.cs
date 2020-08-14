@@ -13,12 +13,17 @@ namespace AlbionProcessor
         [AlbionMarshaller.EventHandler(EventCodes.NewCharacter)]
         public static void HandleNewCharacter(Dictionary<byte, object> parameters, ILog log)
         {
+            //if(CharacterDB.Instance.InCity())
+            //{
+            //    return;
+            //}
             int playerId = int.Parse(parameters[0].ToString());
             string playerName = parameters[1].ToString();
             Guid guid = parameters.ContainsKey(7) ? new Guid((byte[])parameters[7]) : new Guid();
             string guildName = parameters.ContainsKey(8) ? parameters[8].ToString() : "";
             string alliance = parameters.ContainsKey(43) ? parameters[43].ToString() : "";
-            
+            int flag = parameters.ContainsKey(45) ? int.Parse(parameters[45].ToString()) : 0;
+
             Player player = CharacterDB.Instance.FindByName(playerName);
             if (player == null)
             {
@@ -30,6 +35,8 @@ namespace AlbionProcessor
                 player.Guild = guildName;
                 player.Id = playerId;
             }
+
+            player.Flag = (FactionFlag)flag;
 
             string equipStr = "";
             int[] equipment = Convert(parameters[33]);
@@ -110,7 +117,7 @@ namespace AlbionProcessor
             if (parameters.ContainsKey(8))
             {
                 log.Debug($"New Location {parameters[8]}");
-                CharacterDB.Instance.CurrentLocation = parameters[8].ToString();
+                CharacterDB.Instance.ChangeLocation(parameters[8].ToString());
             }
         }
 
@@ -120,7 +127,7 @@ namespace AlbionProcessor
             if (parameters.ContainsKey(0))
             {
                 log.Debug($"New Location {parameters[0]}");
-                CharacterDB.Instance.CurrentLocation = parameters[0].ToString();
+                CharacterDB.Instance.ChangeLocation(parameters[0].ToString());
             }
         }
     }

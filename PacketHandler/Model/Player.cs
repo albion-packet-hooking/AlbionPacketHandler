@@ -37,6 +37,16 @@ namespace AlbionMarshaller.Model
         Potion
     }
 
+    public enum FactionFlag
+    {
+        None = 0,
+        Martlock = 1,
+        Lymhurst = 2,
+        Bridgewatch = 3,
+        FortSterling = 4,
+        Thetford = 5
+    }
+
     public class Player
     {
         private Dictionary<ItemSlot, Dictionary<String, CharacterType>> classifiers = new Dictionary<ItemSlot, Dictionary<String, CharacterType>>
@@ -113,6 +123,11 @@ namespace AlbionMarshaller.Model
                 }
                 return type;
             }
+        }
+
+        public FactionFlag Flag
+        {
+            get; set;
         }
 
         private String _text = null;

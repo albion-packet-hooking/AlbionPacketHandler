@@ -92,5 +92,6 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\world.xml" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
