@@ -19,7 +19,7 @@ using static AlbionMarshaller.BaseEvent;
 
 namespace AlbionProcessor
 {
-    public class PacketHandler
+    /*public class PacketHandler
     {
         public readonly string LogTimer = DateTime.UtcNow.ToString("dd-MMM-HH-mm-ss");
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
@@ -178,7 +178,7 @@ namespace AlbionProcessor
                 || eventCode.ToString().Contains("Guild") || eventCode.ToString().Contains("Harvest") || eventCode.ToString().Contains("Channeling"))
             {
                 return;
-            }*/
+            }
 
             string loggerName = "Event." + eventCode.ToString();
             ILog log = LogManager.GetLogger(loggerName);
@@ -406,8 +406,9 @@ namespace AlbionProcessor
             }
             catch (Exception ex)
             {
+                log.Error(hexPayloadData);
                 log.Error(ex.StackTrace);
             }
         }
-    }
+    }*/
 }

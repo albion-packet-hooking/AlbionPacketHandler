@@ -104,6 +104,7 @@
     <Compile Include="Handlers\SelfLootLogger.cs" />
     <Compile Include="AlbionProcessor.cs" />
     <Compile Include="Handlers\CharacterHandler.cs" />
+    <Compile Include="Handlers\TimeSyncHandler.cs" />
     <Compile Include="PlayerConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -146,6 +147,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\AlbionOtherUI\PhotonPackageParser\PhotonPackageParser.csproj">
+      <Project>{78ADAD95-7E81-4BAF-B7FA-5A53C7857A8B}</Project>
+      <Name>PhotonPackageParser</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PacketHandler\AlbionPacketHandler.csproj">
       <Project>{45106928-72f1-4a87-b00c-d752cb215cb1}</Project>
       <Name>AlbionPacketHandler</Name>

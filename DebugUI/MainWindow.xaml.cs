@@ -46,7 +46,7 @@ namespace DebugLoggerUI
         {
             Dispatcher.Invoke((Action)delegate ()
             {
-                Dictionary<String, int> newEvents = new Dictionary<String, int>(PacketHandler.Instance.triggeredEvents);
+                Dictionary<String, int> newEvents = new Dictionary<String, int>(PhotonPacketHandler.Instance.triggeredEvents);
                 this.Events.ItemsSource = newEvents;
             });
         }

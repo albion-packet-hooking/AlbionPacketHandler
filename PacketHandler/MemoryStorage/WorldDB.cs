@@ -21,6 +21,9 @@ namespace AlbionMarshaller.MemoryStorage
             public string TimeRegion { get; set; }
             public int Tier { get; set; }
         }
+
+        public long WorldTime { get; set; } = -1;
+
         private static readonly Lazy<WorldDB> lazy = new Lazy<WorldDB>(() => new WorldDB());
         public static WorldDB Instance
         {

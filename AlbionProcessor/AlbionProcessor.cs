@@ -1,4 +1,5 @@
-﻿using AlbionMarshaller.MemoryStorage;
+﻿using AlbionMarshaller;
+using AlbionMarshaller.MemoryStorage;
 using AlbionMarshaller.Model;
 using System.IO;
 
@@ -10,20 +11,20 @@ namespace AlbionProcessor
 
         public AlbionProcessor()
         {
-            PacketHandler.Instance.Initialize();
+            PhotonPacketHandler.Instance.Initialize();
             LootDB.Instance.LootAddedToPlayer += PlayerLootAdded;
         }
 
         public void Shutdown()
         {
-            PacketHandler.Instance.Shutdown();
+            PhotonPacketHandler.Instance.Shutdown();
         }
 
         private void PlayerLootAdded(object sender, PlayerLootEventArgs plea)
         {
             Loot item = plea.Loot;
             Player player = plea.Player;
-            string path = Path.Combine(Directory.GetCurrentDirectory(), "aolootlog", PacketHandler.Instance.LogTimer + ".csv");
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "aolootlog", PhotonPacketHandler.Instance.LogTimer + ".csv");
             Directory.CreateDirectory(Path.GetDirectoryName(path));
             string logMessage = $"[{item.LocalPickupTime.ToString()}] {player.Name} has looted {item.Quantity}x {item.ItemName} from {item.BodyName}";
 

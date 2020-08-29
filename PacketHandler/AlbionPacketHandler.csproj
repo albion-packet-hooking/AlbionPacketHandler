@@ -77,6 +77,7 @@
     <Compile Include="Model\Resource.cs" />
     <Compile Include="OperationCodes.cs" />
     <Compile Include="PacketHandler.cs" />
+    <Compile Include="PhotonPacketHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -90,8 +91,15 @@
     <EmbeddedResource Include="Resources\resources.xml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\world.xml" />
+    <EmbeddedResource Include="Resources\world.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\AlbionOtherUI\PhotonPackageParser\PhotonPackageParser.csproj">
+      <Project>{78ADAD95-7E81-4BAF-B7FA-5A53C7857A8B}</Project>
+      <Name>PhotonPackageParser</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
