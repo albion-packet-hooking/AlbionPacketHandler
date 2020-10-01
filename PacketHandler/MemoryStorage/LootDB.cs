@@ -50,7 +50,15 @@ namespace AlbionMarshaller.MemoryStorage
                 lootTable.Remove(loot.ObjectID);
             }
 
-            LootAdded?.Invoke(this, new LootEventArgs(loot));
+            if (LootAdded != null)
+            {
+                LootEventArgs eventArgs = new LootEventArgs(loot);
+                foreach (EventHandler<LootEventArgs> e in LootAdded?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, eventArgs, e.EndInvoke, null);
+                }
+            }
+
             lootTable.Add(loot.ObjectID, loot);
         }
 
@@ -135,7 +143,14 @@ namespace AlbionMarshaller.MemoryStorage
         {
             player.Loots.Add(item);
 
-            LootAddedToPlayer?.Invoke(this, new PlayerLootEventArgs(item, player));
+            if (LootAddedToPlayer != null)
+            {
+                PlayerLootEventArgs pea = new PlayerLootEventArgs(item, player);
+                foreach (EventHandler<PlayerLootEventArgs> e in LootAddedToPlayer?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                }
+            }
         }
 
         public void AddLootToPlayer(Loot item, string playerName)
@@ -150,7 +165,14 @@ namespace AlbionMarshaller.MemoryStorage
 
             player.Loots.Add(item);
 
-            LootAddedToPlayer?.Invoke(this, new PlayerLootEventArgs(item, player));
+            if (LootAddedToPlayer != null)
+            {
+                PlayerLootEventArgs pea = new PlayerLootEventArgs(item, player);
+                foreach (EventHandler<PlayerLootEventArgs> e in LootAddedToPlayer?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                }
+            }
         }
     }
 }

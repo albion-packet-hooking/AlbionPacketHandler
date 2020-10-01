@@ -84,7 +84,14 @@ namespace AlbionMarshaller.MemoryStorage
 
         public void AddPlayer(Player player)
         {
-            PlayerAdded?.Invoke(this, new PlayerEventArgs(player));
+            if (PlayerAdded != null)
+            {
+                PlayerEventArgs pea = new PlayerEventArgs(player);
+                foreach (System.EventHandler<PlayerEventArgs> e in PlayerAdded?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                }
+            }
             if (!PlayerExists(player.Name))
             {
                 characters.Add(player.Name, player);
@@ -94,21 +101,42 @@ namespace AlbionMarshaller.MemoryStorage
         // Don't actually remove the player, just inform others they have left
         public void RemovePlayer(Player player)
         {
-            if (player != null && PlayerExists(player.Name))
+            if (player != null && PlayerExists(player.Name) && PlayerRemoved != null)
             {
-                PlayerRemoved?.Invoke(this, new PlayerEventArgs(player));
+                PlayerEventArgs pea = new PlayerEventArgs(player);
+                foreach (System.EventHandler<PlayerEventArgs> e in PlayerRemoved?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                }
             }
         }
 
         public void ChangeLocation(string newLocationID)
         {
-            CurrentLocation = newLocationID;
-            ZoneChanged?.Invoke(this, null);
+            if (newLocationID != CurrentLocation)
+            {
+                CurrentLocation = newLocationID;
+
+                if (ZoneChanged != null)
+                {
+                    foreach (System.EventHandler e in ZoneChanged.GetInvocationList())
+                    {
+                        e.BeginInvoke(this, null, e.EndInvoke, null);
+                    }
+                }
+            }
         }
 
         public void Clear()
         {
-            PlayerRemoved?.Invoke(this, new PlayerEventArgs(new Player() { Id=-1 }));
+            if (PlayerRemoved != null)
+            {
+                PlayerEventArgs pea = new PlayerEventArgs(new Player() { Id = -1 });
+                foreach (System.EventHandler<PlayerEventArgs> e in PlayerRemoved?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                }
+            }
         }
     }
 }

@@ -128,7 +128,15 @@ namespace AlbionMarshaller.MemoryStorage
                 MobDef resType = mobDictionary[mobType];
                 Mob newMob = new Mob() { MobId = objectId, Name = resType.Name, HarvestableTier = resType.HarvestableTier, HarvestableType = resType.HarvestableType == null ? null : resType.HarvestableType.Type };
                 objectToMobMap.Add(objectId, newMob);
-                MobAdded?.Invoke(this, new MobEventArgs(newMob));
+
+                if (MobRemoved != null)
+                {
+                    MobEventArgs m = new MobEventArgs(newMob);
+                    foreach (System.EventHandler<MobEventArgs> e in MobAdded?.GetInvocationList())
+                    {
+                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                    }
+                }
                 return newMob;
             }
 
@@ -145,19 +153,40 @@ namespace AlbionMarshaller.MemoryStorage
             if (objectToMobMap.ContainsKey(objectId))
             {
                 objectToMobMap.Remove(objectId);
-                MobRemoved?.Invoke(this, new MobRemoveEventArgs(objectId));
+                if (MobRemoved != null)
+                {
+                    MobRemoveEventArgs m = new MobRemoveEventArgs(objectId);
+                    foreach (System.EventHandler<MobRemoveEventArgs> e in MobRemoved?.GetInvocationList())
+                    {
+                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                    }
+                }
             }
         }
 
         public void Clear()
         {
-            MobRemoved?.Invoke(this, new MobRemoveEventArgs(-1));
+            if (MobRemoved != null)
+            {
+                MobRemoveEventArgs m = new MobRemoveEventArgs(-1);
+                foreach (System.EventHandler<MobRemoveEventArgs> e in MobRemoved?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                }
+            }
             objectToMobMap.Clear();
         }
 
         public void NotifyChange(Mob mob, string propertyName)
         {
-            MobChanged?.Invoke(this, new MobChangedEventArgs(mob, propertyName));
+            if (MobChanged != null)
+            {
+                MobChangedEventArgs m = new MobChangedEventArgs(mob, propertyName);
+                foreach (System.EventHandler<MobChangedEventArgs> e in MobChanged?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                }
+            }
         }
 
         public HashSet<string> GetMobsByResourceType(string resourceType)

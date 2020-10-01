@@ -25,12 +25,17 @@ namespace AlbionMarshaller
     {
         public OperationCodes OpCode { get; set; }
         public OperationType OpType { get; set; }
-        public OperationHandler(OperationCodes opCode, OperationType opType = OperationType.Request)
+        public bool Special { get; set; }
+        public OperationHandler(OperationCodes opCode, OperationType opType = OperationType.Request, bool special = false)
         {
             OpCode = opCode;
             OpType = opType;
+            Special = special;
         }
     }
+
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class SpecialHandler : Attribute { }
 
     public abstract class BaseEvent
     {

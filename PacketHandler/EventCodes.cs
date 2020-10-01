@@ -410,6 +410,6 @@
         HideoutObjectUpdate,
         UpdateInfamy,
         Unknown408,
-        NewTunnel = 409,
+        NewTunnel = 410,
     }
 }

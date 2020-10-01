@@ -65,7 +65,7 @@ namespace AlbionProcessor.Handlers
             }
         }
 
-        [OperationHandler(OperationCodes.Join)]
+        [OperationHandler(OperationCodes.Join, OperationType.Response)]
         public static void ResponseJoin(Dictionary<byte, object> parameters, ILog log)
         {
             Guid ownGuid = new Guid((byte[])parameters[1]);

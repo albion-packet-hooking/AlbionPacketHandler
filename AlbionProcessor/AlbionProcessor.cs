@@ -2,11 +2,13 @@
 using AlbionMarshaller.MemoryStorage;
 using AlbionMarshaller.Model;
 using System.IO;
+using System.Threading;
 
 namespace AlbionProcessor
 {
     public class AlbionProcessor
     {
+        private static object _lock = new object();
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public AlbionProcessor()
@@ -47,9 +49,12 @@ namespace AlbionProcessor
             string csvMessage = $"{item.UtcPickupTime.ToString()},{alliance},{guild},{player.Name},{item.ItemName},{item.LongName},{quality},{item.Quantity},{item.BodyName}";
 
             log.Info(logMessage);
-            using (StreamWriter streamWriter = File.AppendText(path))
+            lock (_lock)
             {
-                streamWriter.WriteLine(csvMessage);
+                using (StreamWriter streamWriter = File.AppendText(path))
+                {
+                    streamWriter.WriteLine(csvMessage);
+                }
             }
         }
     }

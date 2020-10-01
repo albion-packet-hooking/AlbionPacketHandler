@@ -116,6 +116,10 @@
       <Project>{45106928-72F1-4A87-B00C-D752CB215CB1}</Project>
       <Name>AlbionPacketHandler</Name>
     </ProjectReference>
+    <ProjectReference Include="..\PhotonPackageParser\PhotonPackageParser.csproj">
+      <Project>{78adad95-7e81-4baf-b7fa-5a53c7857a8b}</Project>
+      <Name>PhotonPackageParser</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -110,7 +110,16 @@ namespace AlbionMarshaller.MemoryStorage
                 ResourceType resType = resourceDictionary[resourceId];
                 Resource newResource = new Resource() { ResourceId = resourceId, Name = resType.Name, Type = resType.Type, Tier = tier };
                 objectIdToResourceMap.Add(objectId, newResource);
-                ResourceAdded?.Invoke(this, new ResourceEventArgs(newResource));
+
+                if (ResourceAdded != null)
+                {
+                    ResourceEventArgs m = new ResourceEventArgs(newResource);
+                    foreach (System.EventHandler<ResourceEventArgs> e in ResourceAdded?.GetInvocationList())
+                    {
+                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                    }
+                }
+
                 return newResource;
             }
 
@@ -136,19 +145,42 @@ namespace AlbionMarshaller.MemoryStorage
             if (objectIdToResourceMap.ContainsKey(objectId))
             {
                 objectIdToResourceMap.Remove(objectId);
-                ResourceRemoved?.Invoke(this, new ResourceRemoveEventArgs(objectId));
+
+                if (ResourceRemoved != null)
+                {
+                    ResourceRemoveEventArgs m = new ResourceRemoveEventArgs(objectId);
+                    foreach (System.EventHandler<ResourceRemoveEventArgs> e in ResourceRemoved?.GetInvocationList())
+                    {
+                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                    }
+                }
             }
         }
 
         public void Clear()
         {
-            ResourceRemoved?.Invoke(this, new ResourceRemoveEventArgs(-1));
+            if (ResourceRemoved != null)
+            {
+                ResourceRemoveEventArgs m = new ResourceRemoveEventArgs(-1);
+                foreach (System.EventHandler<ResourceRemoveEventArgs> e in ResourceRemoved?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                }
+            }
+
             objectIdToResourceMap.Clear();
         }
 
         public void NotifyChange(Resource resource, string propertyName)
         {
-            ResourceChanged?.Invoke(this, new ResourceChangedEventArgs(resource, propertyName));
+            if (ResourceChanged != null)
+            {
+                ResourceChangedEventArgs m = new ResourceChangedEventArgs(resource, propertyName);
+                foreach (System.EventHandler<ResourceChangedEventArgs> e in ResourceChanged?.GetInvocationList())
+                {
+                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                }
+            }
         }
     }
 }

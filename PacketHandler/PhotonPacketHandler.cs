@@ -17,12 +17,18 @@ namespace AlbionMarshaller
 {
     public class PhotonPacketHandler : PhotonParser
     {
+        public delegate byte[] HandleSpecial(byte[] payload, ILog log);
+
         public readonly string LogTimer = DateTime.UtcNow.ToString("dd-MMM-HH-mm-ss");
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private Dictionary<EventCodes, List<HandleEvent>> _eventHandlers = new Dictionary<EventCodes, List<HandleEvent>>();
         private Dictionary<OperationCodes, List<HandleOperation>> _requestHandlers = new Dictionary<OperationCodes, List<HandleOperation>>();
+        private List<HandleOperation> _specialRequestHandlers = new List<HandleOperation>();
         private Dictionary<OperationCodes, List<HandleOperation>> _responseHandlers = new Dictionary<OperationCodes, List<HandleOperation>>();
+        private List<HandleOperation> _specialResponseHandlers = new List<HandleOperation>();
+
+        private HandleSpecial _specialHandler = null;
 
         private bool _initialized = false;
         public PhotonPacketHandler()
@@ -77,23 +83,48 @@ namespace AlbionMarshaller
                         {
                             OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
                             OperationType opType = (OperationType)attributeData.ConstructorArguments[1].Value;
+                            bool special = (bool)attributeData.ConstructorArguments[2].Value;
                             if (opType == OperationType.Request)
                             {
-                                if (!_requestHandlers.ContainsKey(opCode))
+                                if (special)
                                 {
-                                    _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                    _specialRequestHandlers.Add(del);
                                 }
-                                _requestHandlers[opCode].Add(del);
+                                else
+                                {
+                                    if (!_requestHandlers.ContainsKey(opCode))
+                                    {
+                                        _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                    }
+                                    _requestHandlers[opCode].Add(del);
+                                }
                             }
                             else
                             {
-                                if (!_responseHandlers.ContainsKey(opCode))
+                                if (special)
                                 {
-                                    _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                    _specialResponseHandlers.Add(del);
                                 }
-                                _responseHandlers[opCode].Add(del);
+                                else
+                                {
+                                    if (!_responseHandlers.ContainsKey(opCode))
+                                    {
+                                        _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                    }
+                                    _responseHandlers[opCode].Add(del);
+                                }
                             }
                         }
+                    }
+
+                    methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
+                                                                      .SelectMany(t => t.GetMethods())
+                                                                      .Where(m => m.GetCustomAttributes(typeof(SpecialHandler), false).Length > 0)
+                                                                      .ToArray()).ToArray();
+                    foreach (MethodInfo method in methods)
+                    {
+                        var del = (HandleSpecial)Delegate.CreateDelegate(typeof(HandleSpecial), method);
+                        _specialHandler = del;
                     }
 
                     // Technically not initialized but everything after this is internal only
@@ -198,8 +229,12 @@ namespace AlbionMarshaller
             EventCodes eventCode = (EventCodes)iCode;
 
             string loggerName = "Event." + eventCode.ToString();
+
             ILog log = LogManager.GetLogger(loggerName);
-            log.Debug(parameters);
+            #if DEBUG
+                log.Debug(parameters);
+            #endif
+
             if (_eventHandlers.ContainsKey(eventCode))
             {
                 foreach (HandleEvent eventHandler in _eventHandlers[eventCode])
@@ -218,60 +253,109 @@ namespace AlbionMarshaller
 
         protected override void OnRequest(byte operationCode, Dictionary<byte, object> parameters)
         {
-            int iCode = 0;
-            if (int.TryParse(parameters[253].ToString(), out iCode))
+#if DEBUG
+            LogManager.GetLogger("RAW").Debug(parameters);
+#endif
+            if (operationCode == 0)
             {
-                OperationCodes opCode = (OperationCodes)iCode;
-                if (opCode.ToString().StartsWith("Move"))
+                foreach (HandleOperation opHandler in _specialRequestHandlers)
                 {
-                    return;
-                }
-                string loggerName = "Request." + opCode.ToString();
-                ILog log = LogManager.GetLogger(loggerName);
-                log.Debug(parameters);
-
-                if (_requestHandlers.ContainsKey(opCode))
-                {
-                    foreach (HandleOperation opHandler in _requestHandlers[opCode])
+                    try
                     {
-                        try
+                        opHandler(parameters, log);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                }
+            }
+            else
+            {
+                int iCode = 0;
+                if (int.TryParse(parameters[253].ToString(), out iCode))
+                {
+                    OperationCodes opCode = (OperationCodes)iCode;
+                    if (opCode.ToString().StartsWith("Move"))
+                    {
+                        return;
+                    }
+                    string loggerName = "Request." + opCode.ToString();
+                    ILog log = LogManager.GetLogger(loggerName);
+#if DEBUG
+                    log.Debug(parameters);
+#endif
+
+                    if (_requestHandlers.ContainsKey(opCode))
+                    {
+                        foreach (HandleOperation opHandler in _requestHandlers[opCode])
                         {
-                            opHandler(parameters, log);
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Error(ex);
+                            try
+                            {
+                                opHandler(parameters, log);
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex);
+                            }
                         }
                     }
                 }
             }
         }
 
+        protected override byte[] OnSpecial(byte[] bytes)
+        {
+            if (_specialHandler == null) return new byte[0];
+            return _specialHandler(bytes, log);
+        }
+
         protected override void OnResponse(byte operationCode, short returnCode, string debugMessage, Dictionary<byte, object> parameters)
         {
-            int iCode = 0;
+#if DEBUG
             LogManager.GetLogger("RAW").Debug(parameters);
-            if (int.TryParse(parameters[253].ToString(), out iCode))
+#endif
+            if (operationCode == 0)
             {
-                OperationCodes opCode = (OperationCodes)iCode;
-                if (opCode.ToString().StartsWith("Move"))
+                foreach (HandleOperation opHandler in _specialResponseHandlers)
                 {
-                    return;
-                }
-                string loggerName = "Response." + opCode.ToString();
-                ILog log = LogManager.GetLogger(loggerName);
-                log.Debug(parameters);
-                if (_responseHandlers.ContainsKey(opCode))
-                {
-                    foreach (HandleOperation opHandler in _responseHandlers[opCode])
+                    try
                     {
-                        try
+                        opHandler(parameters, log);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex);
+                    }
+                }
+            }
+            else
+            {
+                int iCode = 0;
+                if (int.TryParse(parameters[253].ToString(), out iCode))
+                {
+                    OperationCodes opCode = (OperationCodes)iCode;
+                    if (opCode.ToString().StartsWith("Move"))
+                    {
+                        return;
+                    }
+                    string loggerName = "Response." + opCode.ToString();
+                    ILog log = LogManager.GetLogger(loggerName);
+#if DEBUG
+                    log.Debug(parameters);
+#endif
+                    if (_responseHandlers.ContainsKey(opCode))
+                    {
+                        foreach (HandleOperation opHandler in _responseHandlers[opCode])
                         {
-                            opHandler(parameters, log);
-                        }
-                        catch (Exception ex)
-                        {
-                            log.Error(ex);
+                            try
+                            {
+                                opHandler(parameters, log);
+                            }
+                            catch (Exception ex)
+                            {
+                                log.Error(ex);
+                            }
                         }
                     }
                 }
