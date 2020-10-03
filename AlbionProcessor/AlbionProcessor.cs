@@ -46,7 +46,7 @@ namespace AlbionProcessor
             {
                 quality = item.ItemName.Split('@')[1];
             }
-            string csvMessage = $"{item.UtcPickupTime.ToString()},{alliance},{guild},{player.Name},{item.ItemName},{item.LongName},{quality},{item.Quantity},{item.BodyName}";
+            string csvMessage = $"{item.ItemRefId},{item.UtcPickupTime.ToString()},{alliance},{guild},{player.Name},{item.ItemName},{item.LongName},{quality},{item.Quantity},{item.BodyName}";
 
             log.Info(logMessage);
             lock (_lock)
