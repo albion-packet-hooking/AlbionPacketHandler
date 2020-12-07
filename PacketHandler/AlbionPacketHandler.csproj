@@ -80,6 +80,8 @@
   <ItemGroup>
     <Compile Include="AlbionEvent.cs" />
     <Compile Include="EventCodes.cs" />
+    <Compile Include="Extractor\BinaryDecryptor.cs" />
+    <Compile Include="Extractor\ResourceLoader.cs" />
     <Compile Include="MemoryStorage\CharacterDB.cs" />
     <Compile Include="MemoryStorage\ItemDB.cs" />
     <Compile Include="MemoryStorage\Localization.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="MemoryStorage\MobDB.cs" />
     <Compile Include="MemoryStorage\WorldDB.cs" />
     <Compile Include="Model\Container.cs" />
+    <Compile Include="Model\Item.cs" />
     <Compile Include="Model\Loot.cs" />
     <Compile Include="Model\Mob.cs" />
     <Compile Include="Model\Player.cs" />
@@ -99,17 +102,21 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <EmbeddedResource Include="Resources\items.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\localization.xml" />
-    <EmbeddedResource Include="Resources\mobs.xml" />
-    <EmbeddedResource Include="Resources\resources.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\world.xml">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
+    <None Include="Resources\items.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\localization.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\mobs.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\resources.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\world.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PhotonPackageParser\PhotonPackageParser.csproj">

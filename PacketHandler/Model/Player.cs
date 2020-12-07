@@ -2,6 +2,8 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace AlbionMarshaller.Model
@@ -21,6 +23,16 @@ namespace AlbionMarshaller.Model
         OreGather,
         Fisher,
         Unknown
+    }
+
+    public enum ItemLevel
+    {
+        Journeymans = 3,
+        Adepts = 4,
+        Experts = 5,
+        Masters = 6,
+        Grandmasters = 7,
+        Elders = 8
     }
 
     public enum ItemSlot
@@ -44,10 +56,11 @@ namespace AlbionMarshaller.Model
         Lymhurst = 2,
         Bridgewatch = 3,
         FortSterling = 4,
-        Thetford = 5
+        Thetford = 5,
+        Red = 255
     }
 
-    public class Player
+    public class Player : INotifyPropertyChanged
     {
         private Dictionary<ItemSlot, Dictionary<String, CharacterType>> classifiers = new Dictionary<ItemSlot, Dictionary<String, CharacterType>>
         {
@@ -97,7 +110,21 @@ namespace AlbionMarshaller.Model
         public List<Loot> Loots { get; set; } = new List<Loot>();
 
         [JsonProperty]
-        public Dictionary<ItemSlot, JObject> Gear { get; set; } = new Dictionary<ItemSlot, JObject>();
+        public Dictionary<ItemSlot, Item> Gear { get; set; } = new Dictionary<ItemSlot, Item>();
+
+        private float[] _coordinates;
+        public float[] Coordinates
+        {
+            get
+            {
+                return _coordinates;
+            }
+            set
+            {
+                _coordinates = value;
+                OnPropertyChanged();
+            }
+        }
 
         private CharacterType type = CharacterType.Unknown;
         public CharacterType CharacterType
@@ -111,8 +138,8 @@ namespace AlbionMarshaller.Model
                         Dictionary<String, CharacterType> slotClassifiers = classifiers[slot];
                         if (Gear.ContainsKey(slot))
                         {
-                            JObject item = Gear[slot];
-                            string subtype = item["Subtype"].ToString();
+                            Item item = Gear[slot];
+                            string subtype = item.Subcategory;
                             if (slotClassifiers.ContainsKey(subtype))
                             {
                                 type = slotClassifiers[subtype];
@@ -131,6 +158,9 @@ namespace AlbionMarshaller.Model
         }
 
         private String _text = null;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public String Text
         {
             get
@@ -155,6 +185,7 @@ namespace AlbionMarshaller.Model
             }
         }
 
+        private ItemSlot[] _importantItems = new ItemSlot[] { ItemSlot.MainHand, ItemSlot.OffHand, ItemSlot.Shoes, ItemSlot.Body, ItemSlot.Helmet, ItemSlot.Cape, ItemSlot.Mount };
         public String EquipmentString
         {
             get
@@ -162,30 +193,47 @@ namespace AlbionMarshaller.Model
                 if (Gear.Count > 0)
                 {
                     StringBuilder gearBuilder = new StringBuilder();
-                    foreach (KeyValuePair<ItemSlot, JObject> gearItem in Gear)
+                    foreach(ItemSlot slotType in _importantItems)
                     {
-                        JObject item = gearItem.Value;
-                        string itemName = item["UniqueName"].ToString();
-                        JObject localizedNames = (JObject)item["LocalizedNames"];
-                        if (localizedNames.ContainsKey("EN-US"))
+                        if(Gear.ContainsKey(slotType))
                         {
-                            if (itemName.Contains("@"))
+                            Item item = Gear[slotType];
+                            string itemName = item.UniqueName;
+                            String localizationName = item.LocalizedName;
+                            if (localizationName != null)
                             {
-                                string quality = itemName.Split('@')[1];
-                                itemName = $"{localizedNames["EN-US"].ToString()}.{quality}";
+                                int i = localizationName.IndexOf(" ") + 1;
+                                localizationName = localizationName.Substring(i);
+
+                                string tier = itemName.Substring(0, itemName.IndexOf("_"));
+                                if (!tier.StartsWith("T"))
+                                {
+                                    tier = "";
+                                }
+
+                                if (itemName.Contains("@"))
+                                {
+                                    string quality = itemName.Split('@')[1];
+                                    itemName = $"{tier}.{quality} {localizationName}";
+                                }
+                                else
+                                {
+                                    itemName = $"{tier} {localizationName}";
+                                }
                             }
-                            else
-                            {
-                                itemName = localizedNames["EN-US"].ToString();
-                            }
+                            gearBuilder.Append($"{itemName} | ");
                         }
-                        gearBuilder.Append($"{itemName} | ");
                     }
 
                     return gearBuilder.ToString();
                 }
                 return null;
             }
+        }
+
+        protected void OnPropertyChanged([CallerMemberName]string name = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         public override string ToString()

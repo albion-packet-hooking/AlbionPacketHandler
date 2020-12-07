@@ -276,10 +276,6 @@ namespace AlbionMarshaller
                 if (int.TryParse(parameters[253].ToString(), out iCode))
                 {
                     OperationCodes opCode = (OperationCodes)iCode;
-                    if (opCode.ToString().StartsWith("Move"))
-                    {
-                        return;
-                    }
                     string loggerName = "Request." + opCode.ToString();
                     ILog log = LogManager.GetLogger(loggerName);
 #if DEBUG
@@ -335,10 +331,6 @@ namespace AlbionMarshaller
                 if (int.TryParse(parameters[253].ToString(), out iCode))
                 {
                     OperationCodes opCode = (OperationCodes)iCode;
-                    if (opCode.ToString().StartsWith("Move"))
-                    {
-                        return;
-                    }
                     string loggerName = "Response." + opCode.ToString();
                     ILog log = LogManager.GetLogger(loggerName);
 #if DEBUG

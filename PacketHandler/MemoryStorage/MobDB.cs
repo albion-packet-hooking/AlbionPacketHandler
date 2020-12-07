@@ -1,4 +1,5 @@
-﻿using AlbionMarshaller.Model;
+﻿using AlbionMarshaller.Extractor;
+using AlbionMarshaller.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -58,51 +59,44 @@ namespace AlbionMarshaller.MemoryStorage
         {
             log.Info("Loading Mobs into memory");
 
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "AlbionMarshaller.Resources.mobs.xml";
+            XDocument mobDoc = ResourceLoader.LoadResource("mobs");
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
+            int index = 0;
+            foreach (XElement mob in mobDoc.Root.Elements())
             {
-                XDocument mobDoc = XDocument.Parse(reader.ReadToEnd());
-
-                int index = 0;
-                foreach (XElement mob in mobDoc.Root.Elements())
+                String mobName = mob.Attribute("uniquename").Value;
+                String localeName = $"@MOB_{mobName}";
+                if (mob.Attribute("namelocatag") != null)
                 {
-                    String mobName = mob.Attribute("uniquename").Value;
-                    String localeName = $"@MOB_{mobName}";
-                    if (mob.Attribute("namelocatag") != null)
-                    {
-                        localeName = mob.Attribute("namelocatag").Value;
-                    }
-                    MobDef def = new MobDef() { UniqueName = mobName, Name = Localization.Instance.Find(localeName) };
-
-                    XElement lootNode = mob.Element("Loot");
-                    if (lootNode != null)
-                    {
-                        XElement harvestable = lootNode.Element("Harvestable");
-                        if (harvestable != null)
-                        {
-                            int tier = int.Parse(harvestable.Attribute("tier").Value);
-                            String type = harvestable.Attribute("type").Value;
-                            def.HarvestableType = ResourceDB.Instance.FindResourceTypeByName(type);
-                            def.HarvestableTier = tier;
-                        }
-                    }
-
-                    if (def.HarvestableType != null && def.HarvestableType.Type != null && def.HarvestableTier > 1)
-                    {
-                        if (harvestableToMob.ContainsKey(def.HarvestableType.Type))
-                        {
-                            harvestableToMob[def.HarvestableType.Type].Add(def.Name);
-                        }
-                        else
-                        {
-                            harvestableToMob.Add(def.HarvestableType.Type, new HashSet<string>() { def.Name });
-                        }
-                    }
-                    mobDictionary.Add(index++, def);
+                    localeName = mob.Attribute("namelocatag").Value;
                 }
+                MobDef def = new MobDef() { UniqueName = mobName, Name = Localization.Instance.Find(localeName) };
+
+                XElement lootNode = mob.Element("Loot");
+                if (lootNode != null)
+                {
+                    XElement harvestable = lootNode.Element("Harvestable");
+                    if (harvestable != null)
+                    {
+                        int tier = int.Parse(harvestable.Attribute("tier").Value);
+                        String type = harvestable.Attribute("type").Value;
+                        def.HarvestableType = ResourceDB.Instance.FindResourceTypeByName(type);
+                        def.HarvestableTier = tier;
+                    }
+                }
+
+                if (def.HarvestableType != null && def.HarvestableType.Type != null && def.HarvestableTier > 1)
+                {
+                    if (harvestableToMob.ContainsKey(def.HarvestableType.Type))
+                    {
+                        harvestableToMob[def.HarvestableType.Type].Add(def.Name);
+                    }
+                    else
+                    {
+                        harvestableToMob.Add(def.HarvestableType.Type, new HashSet<string>() { def.Name });
+                    }
+                }
+                mobDictionary.Add(index++, def);
             }
             log.Info("Finished loading Mobs into memory");
         }

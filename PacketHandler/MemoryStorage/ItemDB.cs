@@ -1,28 +1,101 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using AlbionMarshaller.Extractor;
+using AlbionMarshaller.Model;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace AlbionMarshaller.MemoryStorage
 {
     public class ItemDB
     {
-        private Dictionary<int, JObject> itemDictionary = new Dictionary<int, JObject>();
+        private Dictionary<int, Item> itemDictionary = new Dictionary<int, Item>();
         private ItemDB()
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = "AlbionMarshaller.Resources.items.json";
+            XDocument itemDoc = ResourceLoader.LoadResource("items");
 
-            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
+            List<String> journals = new List<String>();
+            int index = 0;
+            foreach (XElement itemEle in itemDoc.Root.Elements())
             {
-                JArray itemArray = JArray.Parse(reader.ReadToEnd());
-                foreach (JObject item in itemArray)
+                XAttribute uniqueNameAtt = itemEle.Attribute("uniquename") ?? null;
+                XAttribute enchantmentLevel = itemEle.Attribute("enchantmentlevel") ?? null;
+                XAttribute description = itemEle.Attribute("descriptionlocatag") ?? null;
+                XAttribute descriptionName = itemEle.Attribute("descvariable0") ?? null;
+                XAttribute subCategory = itemEle.Attribute("shopsubcategory1") ?? null;
+
+                String uniqueName = uniqueNameAtt != null ? uniqueNameAtt.Value : null;
+                if (uniqueName != null && enchantmentLevel != null && enchantmentLevel.Value != "0")
                 {
-                    int id = int.Parse(item["Index"].ToString());
-                    itemDictionary.Add(id, item);
+                    uniqueName += "@" + enchantmentLevel.Value;
                 }
+
+                itemDictionary.Add(index,
+                    new Item()
+                    {
+                        Id = index,
+                        UniqueName = uniqueName,
+                        EnchantmentLevel = enchantmentLevel != null ? enchantmentLevel.Value : null,
+                        Description = description != null ? description.Value : null,
+                        DescriptiveName = descriptionName != null ? descriptionName.Value : null,
+                        Subcategory = subCategory != null ? subCategory.Value : null
+                    });
+
+                index++;
+
+                if (itemEle.Name == "journalitem")
+                {
+                    journals.Add(uniqueName);
+                }
+
+                XElement enchantments = itemEle.Element("enchantments");
+                if (enchantments != null)
+                {
+                    IEnumerable<XElement> enchantmentLevels = enchantments.Elements("enchantment");
+                    foreach (XElement enchantment in enchantmentLevels)
+                    {
+                        string eUniqueName = uniqueNameAtt.Value + "@" + enchantment.Attribute("enchantmentlevel").Value;
+                        itemDictionary.Add(index,
+                            new Item()
+                            {
+                                Id = index,
+                                UniqueName = eUniqueName,
+                                EnchantmentLevel = enchantment.Attribute("enchantmentlevel").Value,
+                                Description = description != null ? description.Value : null,
+                                DescriptiveName = descriptionName != null ? descriptionName.Value : null,
+                                Subcategory = subCategory != null ? subCategory.Value : null
+                            });
+
+                        index++;
+                    }
+                }
+            }
+
+            foreach (String j in journals)
+            {
+                string emptyName = j + "_EMPTY";
+                itemDictionary.Add(index,
+                        new Item()
+                        {
+                            Id = index,
+                            UniqueName = emptyName
+
+                        }
+                    );
+                index++;
+                string fullName = j + "_FULL";
+                itemDictionary.Add(index,
+                        new Item()
+                        {
+                            Id = index,
+                            UniqueName = fullName
+
+                        }
+                    );
+                index++;
             }
         }
 
@@ -35,7 +108,7 @@ namespace AlbionMarshaller.MemoryStorage
             }
         }
 
-        public JObject FindItem(int id)
+        public Item FindItem(int id)
         {
             return itemDictionary.ContainsKey(id) ? itemDictionary[id] : null;
         }

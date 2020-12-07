@@ -172,18 +172,14 @@ namespace LootUI
 
                 int itemId = int.Parse(record[0]);
 
-                JObject newItem = ItemDB.Instance.FindItem(itemId);
-                string itemName = newItem["UniqueName"].ToString();
-                if (newItem.ContainsKey("LocalizedNames") && newItem["LocalizedNames"] != null)
+                Item newItem = ItemDB.Instance.FindItem(itemId);
+                string itemName = newItem.UniqueName;
+                if (newItem.LocalizationName != null)
                 {
-                    JObject localizedNames = (JObject)newItem["LocalizedNames"];
-                    if (localizedNames.ContainsKey("EN-US"))
-                    {
-                        itemName += " - " + localizedNames["EN-US"].ToString();
-                    }
+                    itemName += " - " + newItem.LocalizationName;
                 }
 
-                string shortName = newItem["UniqueName"].ToString();
+                string shortName = newItem.UniqueName;
                 string quality = "0";
                 if (shortName.Contains("@"))
                 {

@@ -38,15 +38,11 @@ namespace AlbionProcessor
                 Loot loot = LootDB.Instance.FindLoot(itemID);
                 if (loot == null)
                 {
-                    JObject item = ItemDB.Instance.FindItem(itemTypeID);
-                    string itemName = item["UniqueName"].ToString();
-                    if (item.ContainsKey("LocalizedNames"))
+                    Item item = ItemDB.Instance.FindItem(itemTypeID);
+                    string itemName = item.UniqueName;
+                    if (item.LocalizationName != null)
                     {
-                        JObject localizedNames = (JObject)item["LocalizedNames"];
-                        if (localizedNames.ContainsKey("EN-US"))
-                        {
-                            itemName += " - " + localizedNames["EN-US"].ToString();
-                        }
+                        itemName += " - " + item.LocalizedName;
                     }
 
                     loot = new Loot()
@@ -57,7 +53,7 @@ namespace AlbionProcessor
                         Quantity = quantity,
                         LocalPickupTime = DateTime.Now.ToLocalTime(),
                         UtcPickupTime = DateTime.UtcNow,
-                        ItemName = item["UniqueName"].ToString(),
+                        ItemName = item.UniqueName,
                         LongName = itemName,
                         BodyName = container.Owner
                     };
@@ -114,15 +110,11 @@ namespace AlbionProcessor
             string looter = parameters[2].ToString();
             string quantity = parameters[5].ToString();
             int itemId = int.Parse(parameters[4].ToString());
-            JObject item = ItemDB.Instance.FindItem(itemId);
-            string itemName = item["UniqueName"].ToString();
-            if (item.ContainsKey("LocalizedNames"))
+            Item item = ItemDB.Instance.FindItem(itemId);
+            string itemName = item.UniqueName;
+            if (item.LocalizationName != null)
             {
-                JObject localizedNames = (JObject)item["LocalizedNames"];
-                if (localizedNames.ContainsKey("EN-US"))
-                {
-                    itemName += " - " + localizedNames["EN-US"].ToString();
-                }
+                itemName += " - " + item.LocalizedName;
             }
 
             string deadPlayer = parameters[1].ToString();
@@ -130,7 +122,7 @@ namespace AlbionProcessor
             Loot loot = new Loot
             {
                 ItemRefId = itemId,
-                ItemName = item["UniqueName"].ToString(),
+                ItemName = item.UniqueName,
                 LongName = itemName,
                 Quantity = int.Parse(quantity.ToString()),
                 LocalPickupTime = DateTime.UtcNow.ToLocalTime(),

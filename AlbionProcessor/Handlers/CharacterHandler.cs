@@ -23,6 +23,7 @@ namespace AlbionProcessor
             string guildName = parameters.ContainsKey(8) ? parameters[8].ToString() : "";
             string alliance = parameters.ContainsKey(43) ? parameters[43].ToString() : "";
             int flag = parameters.ContainsKey(45) ? int.Parse(parameters[45].ToString()) : 0;
+            float[] coordinates = parameters.ContainsKey(12) ? (float[])parameters[12] : null;
 
             Player player = CharacterDB.Instance.FindByName(playerName);
             if (player == null)
@@ -36,6 +37,7 @@ namespace AlbionProcessor
                 player.Id = playerId;
             }
 
+            player.Coordinates = coordinates;
             player.Flag = (FactionFlag)flag;
 
             string equipStr = "";
@@ -45,7 +47,7 @@ namespace AlbionProcessor
                 int itemID = equipment[i];
                 if (itemID > 0)
                 {
-                    JObject item = ItemDB.Instance.FindItem(itemID);
+                    Item item = ItemDB.Instance.FindItem(itemID);
                     ItemSlot slot = (ItemSlot)i;
                     if(player.Gear.ContainsKey((ItemSlot)i))
                     {
@@ -56,18 +58,18 @@ namespace AlbionProcessor
                         player.Gear.Add(slot, item);
                     }
 
-                    string itemName = item["UniqueName"].ToString();
-                    JObject localizedNames = (JObject)item["LocalizedNames"];
-                    if (localizedNames.ContainsKey("EN-US"))
+                    string itemName = item.UniqueName;
+                    string localizationName = item.LocalizationName;
+                    if (localizationName != null)
                     {
                         if (itemName.Contains("@"))
                         {
                             string quality = itemName.Split('@')[1];
-                            itemName = $"{localizedNames["EN-US"].ToString()}.{quality}";
+                            itemName = $"{localizationName}.{quality}";
                         }
                         else
                         {
-                            itemName = localizedNames["EN-US"].ToString();
+                            itemName = localizationName;
                         }
                     }
                     equipStr += itemName + " | ";

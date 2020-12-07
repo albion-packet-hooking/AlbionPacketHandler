@@ -162,15 +162,11 @@ namespace AlbionProcessor
             int itemID = int.Parse(parameters[1].ToString());
             int quantity = int.Parse(parameters[2].ToString());
 
-            JObject item = ItemDB.Instance.FindItem(itemID);
-            string itemName = item["UniqueName"].ToString();
-            if (item.ContainsKey("LocalizedNames") && item["LocalizedNames"] != null)
+            Item item = ItemDB.Instance.FindItem(itemID);
+            string itemName = item.UniqueName;
+            if (item.LocalizationName != null)
             {
-                JObject localizedNames = (JObject)item["LocalizedNames"];
-                if (localizedNames.ContainsKey("EN-US"))
-                {
-                    itemName += " - " + localizedNames["EN-US"].ToString();
-                }
+                itemName += " - " + item.LocalizedName;
             }
 
             LootDB.Instance.AddLoot(
@@ -178,7 +174,7 @@ namespace AlbionProcessor
                 {
                     ObjectID = objectID,
                     ItemRefId = itemID,
-                    ItemName = item["UniqueName"].ToString(),
+                    ItemName = item.UniqueName,
                     LongName = itemName,
                     Quantity = quantity,
                     LocalPickupTime = DateTime.Now.ToLocalTime(),
