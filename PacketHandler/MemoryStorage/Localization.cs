@@ -29,7 +29,10 @@ namespace AlbionMarshaller.MemoryStorage
             {
                 string name = loc.Attribute("tuid").Value;
                 string enUS = loc.Elements("tuv").Where(x => x.Attribute(XNamespace.Xml + "lang").Value == "EN-US").Select(x => x.Value).FirstOrDefault();
-                _nameToTranslation.Add(name, enUS);
+                if (!_nameToTranslation.ContainsKey(name))
+                {
+                    _nameToTranslation.Add(name, enUS);
+                }
             }
         }
 
