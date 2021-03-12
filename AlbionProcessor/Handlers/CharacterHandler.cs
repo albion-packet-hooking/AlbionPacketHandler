@@ -36,9 +36,15 @@ namespace AlbionProcessor
                 player.Guild = guildName;
                 player.Id = playerId;
             }
+            
+            if (CharacterDB.Instance.PartyMembers.Contains(guid))
+            {
+                player.InParty = true;
+            }
 
             player.Coordinates = coordinates;
             player.Flag = (FactionFlag)flag;
+            player.Gear.Clear();
 
             string equipStr = "";
             int[] equipment = Convert(parameters[33]);

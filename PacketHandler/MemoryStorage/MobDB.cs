@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace AlbionMarshaller.MemoryStorage
@@ -128,7 +129,7 @@ namespace AlbionMarshaller.MemoryStorage
                     MobEventArgs m = new MobEventArgs(newMob);
                     foreach (System.EventHandler<MobEventArgs> e in MobAdded?.GetInvocationList())
                     {
-                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                        Task.Run(() => e.Invoke(this, m));
                     }
                 }
                 return newMob;
@@ -152,7 +153,7 @@ namespace AlbionMarshaller.MemoryStorage
                     MobRemoveEventArgs m = new MobRemoveEventArgs(objectId);
                     foreach (System.EventHandler<MobRemoveEventArgs> e in MobRemoved?.GetInvocationList())
                     {
-                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                        Task.Run(() => e.Invoke(this, m));
                     }
                 }
             }
@@ -165,7 +166,7 @@ namespace AlbionMarshaller.MemoryStorage
                 MobRemoveEventArgs m = new MobRemoveEventArgs(-1);
                 foreach (System.EventHandler<MobRemoveEventArgs> e in MobRemoved?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, m));
                 }
             }
             objectToMobMap.Clear();
@@ -178,7 +179,7 @@ namespace AlbionMarshaller.MemoryStorage
                 MobChangedEventArgs m = new MobChangedEventArgs(mob, propertyName);
                 foreach (System.EventHandler<MobChangedEventArgs> e in MobChanged?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, m));
                 }
             }
         }

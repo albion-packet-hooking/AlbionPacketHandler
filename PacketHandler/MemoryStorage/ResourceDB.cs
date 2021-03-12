@@ -106,7 +106,7 @@ namespace AlbionMarshaller.MemoryStorage
                     ResourceEventArgs m = new ResourceEventArgs(newResource);
                     foreach (System.EventHandler<ResourceEventArgs> e in ResourceAdded?.GetInvocationList())
                     {
-                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                        Task.Run(() => e.Invoke(this, m));
                     }
                 }
 
@@ -141,7 +141,7 @@ namespace AlbionMarshaller.MemoryStorage
                     ResourceRemoveEventArgs m = new ResourceRemoveEventArgs(objectId);
                     foreach (System.EventHandler<ResourceRemoveEventArgs> e in ResourceRemoved?.GetInvocationList())
                     {
-                        e.BeginInvoke(this, m, e.EndInvoke, null);
+                        Task.Run(() => e.Invoke(this, m));
                     }
                 }
             }
@@ -154,7 +154,7 @@ namespace AlbionMarshaller.MemoryStorage
                 ResourceRemoveEventArgs m = new ResourceRemoveEventArgs(-1);
                 foreach (System.EventHandler<ResourceRemoveEventArgs> e in ResourceRemoved?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, m));
                 }
             }
 
@@ -168,7 +168,7 @@ namespace AlbionMarshaller.MemoryStorage
                 ResourceChangedEventArgs m = new ResourceChangedEventArgs(resource, propertyName);
                 foreach (System.EventHandler<ResourceChangedEventArgs> e in ResourceChanged?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, m, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, m));
                 }
             }
         }

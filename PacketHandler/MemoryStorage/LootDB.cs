@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AlbionMarshaller.MemoryStorage
 {
@@ -55,7 +56,7 @@ namespace AlbionMarshaller.MemoryStorage
                 LootEventArgs eventArgs = new LootEventArgs(loot);
                 foreach (EventHandler<LootEventArgs> e in LootAdded?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, eventArgs, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, eventArgs));
                 }
             }
 
@@ -148,7 +149,7 @@ namespace AlbionMarshaller.MemoryStorage
                 PlayerLootEventArgs pea = new PlayerLootEventArgs(item, player);
                 foreach (EventHandler<PlayerLootEventArgs> e in LootAddedToPlayer?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, pea));
                 }
             }
         }
@@ -170,7 +171,7 @@ namespace AlbionMarshaller.MemoryStorage
                 PlayerLootEventArgs pea = new PlayerLootEventArgs(item, player);
                 foreach (EventHandler<PlayerLootEventArgs> e in LootAddedToPlayer?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, pea));
                 }
             }
         }

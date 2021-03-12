@@ -412,6 +412,14 @@
         Unknown408,
         Unknown409,
         Unknown410,
+        /*Unknown411,
+        Unknown412,
+        Unknown413,
+        Unknown414,
+        Unknown415,
+        Unknown416,
+        Unknown417,
+        NewTunnel = 418,*/
         NewTunnel = 411,
     }
 }

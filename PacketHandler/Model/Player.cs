@@ -126,6 +126,11 @@ namespace AlbionMarshaller.Model
             }
         }
 
+        public bool InParty
+        {
+            get; set;
+        }
+
         private CharacterType type = CharacterType.Unknown;
         public CharacterType CharacterType
         {

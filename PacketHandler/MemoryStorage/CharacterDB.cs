@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace AlbionMarshaller.MemoryStorage
 {
@@ -21,6 +22,7 @@ namespace AlbionMarshaller.MemoryStorage
         public event System.EventHandler ZoneChanged;
 
         private Dictionary<String, Player> characters = new Dictionary<String, Player>();
+        private Dictionary<Guid, Player> charactersByGuid = new Dictionary<Guid, Player>();
         private CharacterDB()
         {
             AddPlayer(Self);
@@ -36,6 +38,8 @@ namespace AlbionMarshaller.MemoryStorage
         }
 
         public Player Self { get; set; } = new Player() { Id = -1000, Name = "OWN_GOD_DAMN_PLAYER" };
+
+        public HashSet<Guid> PartyMembers { get; set; } = new HashSet<Guid>();
 
         public string CurrentLocation { get; set; } = "-1";
 
@@ -82,6 +86,16 @@ namespace AlbionMarshaller.MemoryStorage
             return null;
         }
 
+        public Player FindByGuid(Guid guid)
+        {
+            Player player = null;
+            if(charactersByGuid.TryGetValue(guid, out player))
+            {
+                return player;
+            }
+            return null;
+        }
+
         public void AddPlayer(Player player)
         {
             if (PlayerAdded != null)
@@ -89,12 +103,13 @@ namespace AlbionMarshaller.MemoryStorage
                 PlayerEventArgs pea = new PlayerEventArgs(player);
                 foreach (System.EventHandler<PlayerEventArgs> e in PlayerAdded?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, pea));
                 }
             }
             if (!PlayerExists(player.Name))
             {
                 characters.Add(player.Name, player);
+                charactersByGuid.Add(player.Guid, player);
             }
         }
 
@@ -106,7 +121,7 @@ namespace AlbionMarshaller.MemoryStorage
                 PlayerEventArgs pea = new PlayerEventArgs(player);
                 foreach (System.EventHandler<PlayerEventArgs> e in PlayerRemoved?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, pea));
                 }
             }
         }
@@ -121,7 +136,7 @@ namespace AlbionMarshaller.MemoryStorage
                 {
                     foreach (System.EventHandler e in ZoneChanged.GetInvocationList())
                     {
-                        e.BeginInvoke(this, null, e.EndInvoke, null);
+                        Task.Run(() => e.Invoke(this, null));
                     }
                 }
             }
@@ -134,7 +149,7 @@ namespace AlbionMarshaller.MemoryStorage
                 PlayerEventArgs pea = new PlayerEventArgs(new Player() { Id = -1 });
                 foreach (System.EventHandler<PlayerEventArgs> e in PlayerRemoved?.GetInvocationList())
                 {
-                    e.BeginInvoke(this, pea, e.EndInvoke, null);
+                    Task.Run(() => e.Invoke(this, pea));
                 }
             }
         }

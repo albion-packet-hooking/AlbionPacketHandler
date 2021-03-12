@@ -31,11 +31,8 @@ namespace AlbionMarshaller
         private HandleSpecial _specialHandler = null;
 
         private bool _initialized = false;
-        public PhotonPacketHandler()
-        {
-            Initialize();
-        }
-        public void Initialize()
+
+        public void Initialize(HashSet<EventCodes> targetedEvents, HashSet<OperationCodes> targetedOperations, bool handleSpecial = true)
         {
             if (!_initialized)
             {
@@ -64,11 +61,14 @@ namespace AlbionMarshaller
                         foreach (CustomAttributeData attributeData in method.CustomAttributes)
                         {
                             EventCodes eventCode = (EventCodes)attributeData.ConstructorArguments[0].Value;
-                            if (!_eventHandlers.ContainsKey(eventCode))
+                            if (targetedEvents == null || targetedEvents.Contains(eventCode))
                             {
-                                _eventHandlers.Add(eventCode, new List<HandleEvent>());
+                                if (!_eventHandlers.ContainsKey(eventCode))
+                                {
+                                    _eventHandlers.Add(eventCode, new List<HandleEvent>());
+                                }
+                                _eventHandlers[eventCode].Add(del);
                             }
-                            _eventHandlers[eventCode].Add(del);
                         }
                     }
 
@@ -84,34 +84,37 @@ namespace AlbionMarshaller
                             OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
                             OperationType opType = (OperationType)attributeData.ConstructorArguments[1].Value;
                             bool special = (bool)attributeData.ConstructorArguments[2].Value;
-                            if (opType == OperationType.Request)
+                            if ((handleSpecial && special) || (targetedOperations == null || targetedOperations.Contains(opCode)))
                             {
-                                if (special)
+                                if (opType == OperationType.Request)
                                 {
-                                    _specialRequestHandlers.Add(del);
+                                    if (special)
+                                    {
+                                        _specialRequestHandlers.Add(del);
+                                    }
+                                    else
+                                    {
+                                        if (!_requestHandlers.ContainsKey(opCode))
+                                        {
+                                            _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                        }
+                                        _requestHandlers[opCode].Add(del);
+                                    }
                                 }
                                 else
                                 {
-                                    if (!_requestHandlers.ContainsKey(opCode))
+                                    if (special)
                                     {
-                                        _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                        _specialResponseHandlers.Add(del);
                                     }
-                                    _requestHandlers[opCode].Add(del);
-                                }
-                            }
-                            else
-                            {
-                                if (special)
-                                {
-                                    _specialResponseHandlers.Add(del);
-                                }
-                                else
-                                {
-                                    if (!_responseHandlers.ContainsKey(opCode))
+                                    else
                                     {
-                                        _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                        if (!_responseHandlers.ContainsKey(opCode))
+                                        {
+                                            _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                        }
+                                        _responseHandlers[opCode].Add(del);
                                     }
-                                    _responseHandlers[opCode].Add(del);
                                 }
                             }
                         }
@@ -131,6 +134,11 @@ namespace AlbionMarshaller
                     _initialized = true;
                 }
             }
+        }
+
+        public void Initialize()
+        {
+            Initialize(null, null);
         }
 
         private static readonly Lazy<PhotonPacketHandler> lazy = new Lazy<PhotonPacketHandler>(() => new PhotonPacketHandler());
