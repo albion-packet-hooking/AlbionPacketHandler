@@ -257,6 +257,10 @@
         InvitedToArenaMatch,
         PlayerCounts,
         InCombatStateUpdate,
+        Unknown256, // No idea if this is the real placement
+        Unknown257,
+        Unknown258,
+        Unknown259,
         OtherGrabbedLoot,
         SiegeCampClaimStart,
         SiegeCampClaimCancel,
@@ -277,7 +281,8 @@
         FriendRequestInfos,
         FriendInfos,
         FriendRequestAnswered,
-        FriendOnlineStatus,
+        Unknown279,
+        FriendOnlineStatus, // Should be down by partyloot items
         FriendRequestCanceled,
         FriendRemoved,
         FriendUpdated,
@@ -409,17 +414,11 @@
         NewHomeObject,
         HideoutObjectUpdate,
         UpdateInfamy,
-        Unknown408,
-        Unknown409,
-        Unknown410,
-        /*Unknown411,
-        Unknown412,
         Unknown413,
         Unknown414,
         Unknown415,
         Unknown416,
         Unknown417,
-        NewTunnel = 418,*/
-        NewTunnel = 411,
+        NewTunnel = 418,
     }
 }
