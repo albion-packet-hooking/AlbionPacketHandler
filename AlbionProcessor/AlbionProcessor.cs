@@ -1,6 +1,7 @@
 ﻿using AlbionMarshaller;
 using AlbionMarshaller.MemoryStorage;
 using AlbionMarshaller.Model;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 
@@ -11,6 +12,11 @@ namespace AlbionProcessor
         private static object _lock = new object();
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        public AlbionProcessor(HashSet<EventCodes> targetedEvents, HashSet<OperationCodes> targetedOperations, bool handleSpecial = true)
+        {
+            PhotonPacketHandler.Instance.Initialize(targetedEvents, targetedOperations, handleSpecial);
+            LootDB.Instance.LootAddedToPlayer += PlayerLootAdded;
+        }
         public AlbionProcessor()
         {
             PhotonPacketHandler.Instance.Initialize();

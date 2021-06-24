@@ -4,6 +4,7 @@ using AlbionMarshaller.Model;
 using log4net;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,7 @@ namespace AlbionProcessor.Handlers
 
                 if (player != null)
                 {
+                    Debug.WriteLine("PartyOnClusterPartyJoined: " + player.Name);
                     player.InParty = true;
                 }
             }
@@ -45,6 +47,7 @@ namespace AlbionProcessor.Handlers
                 Player player = CharacterDB.Instance.FindByGuid(playerGuid);
                 if (player != null)
                 {
+                    Debug.WriteLine("PartyJoined: " + player.Name);
                     player.InParty = true;
                 }
             }
@@ -74,6 +77,7 @@ namespace AlbionProcessor.Handlers
 
             if(player != null)
             {
+                Debug.WriteLine("PartyPlayerJoined: " + player.Name);
                 player.InParty = true;
             }
         }

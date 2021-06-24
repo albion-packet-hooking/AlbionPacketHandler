@@ -109,8 +109,9 @@ namespace AlbionMarshaller.MemoryStorage
             if (!PlayerExists(player.Name))
             {
                 characters.Add(player.Name, player);
-                charactersByGuid.Add(player.Guid, player);
             }
+
+            charactersByGuid[player.Guid] = player;
         }
 
         // Don't actually remove the player, just inform others they have left

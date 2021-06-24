@@ -14,5 +14,7 @@ namespace AlbionMarshaller.Model
         public int Quality { get; set; } = 0;
         public string HarvestableType { get; set; }
         public int HarvestableTier { get; set; }
+        public int CurrentHealth { get; set; }
+        public int MaxHealth { get; set; }
     }
 }

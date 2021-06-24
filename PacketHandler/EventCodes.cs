@@ -258,9 +258,6 @@
         PlayerCounts,
         InCombatStateUpdate,
         Unknown256, // No idea if this is the real placement
-        Unknown257,
-        Unknown258,
-        Unknown259,
         OtherGrabbedLoot,
         SiegeCampClaimStart,
         SiegeCampClaimCancel,
@@ -416,9 +413,6 @@
         UpdateInfamy,
         Unknown413,
         Unknown414,
-        Unknown415,
-        Unknown416,
-        Unknown417,
-        NewTunnel = 418,
+        NewTunnel = 415,
     }
 }

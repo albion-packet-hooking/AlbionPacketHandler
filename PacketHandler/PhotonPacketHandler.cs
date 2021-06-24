@@ -17,6 +17,8 @@ namespace AlbionMarshaller
 {
     public class PhotonPacketHandler : PhotonParser
     {
+        private PacketQueue _packetQueue = new PacketQueue();
+
         public delegate byte[] HandleSpecial(byte[] payload, ILog log);
 
         public readonly string LogTimer = DateTime.UtcNow.ToString("dd-MMM-HH-mm-ss");
@@ -34,105 +36,118 @@ namespace AlbionMarshaller
 
         public void Initialize(HashSet<EventCodes> targetedEvents, HashSet<OperationCodes> targetedOperations, bool handleSpecial = true)
         {
-            if (!_initialized)
-            {
-                lock (this)
+            try
+            { 
+                if (!_initialized)
                 {
-                    new Thread(delegate ()
+                    lock (this)
                     {
-                        this.CreateListener();
-                    }).Start();
+                        log.Debug("Initiliazing PhotonPacketHandler");
+                        new Thread(delegate ()
+                        {
+                            this.CreateListener();
+                        }).Start();
 
-                    var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
-                    var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
+                        var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToList();
+                        var loadedPaths = loadedAssemblies.Select(a => a.Location).ToArray();
 
-                    var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
-                    var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
+                        var referencedPaths = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll");
+                        var toLoad = referencedPaths.Where(r => !loadedPaths.Contains(r, StringComparer.InvariantCultureIgnoreCase)).ToList();
 
-                    toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
+                        toLoad.ForEach(path => loadedAssemblies.Add(AppDomain.CurrentDomain.Load(AssemblyName.GetAssemblyName(path))));
 
-                    var methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
+                        var methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
+                                                                              .SelectMany(t => t.GetMethods())
+                                                                              .Where(m => m.GetCustomAttributes(typeof(AlbionMarshaller.EventHandler), false).Length > 0)
+                                                                              .ToArray()).ToArray();
+                        foreach (MethodInfo method in methods)
+                        {
+                            var del = (HandleEvent)Delegate.CreateDelegate(typeof(HandleEvent), method);
+                            foreach (CustomAttributeData attributeData in method.CustomAttributes)
+                            {
+                                EventCodes eventCode = (EventCodes)attributeData.ConstructorArguments[0].Value;
+                                if (targetedEvents == null || targetedEvents.Contains(eventCode))
+                                {
+                                    if (!_eventHandlers.ContainsKey(eventCode))
+                                    {
+                                        _eventHandlers.Add(eventCode, new List<HandleEvent>());
+                                    }
+
+                                    log.Debug("Adding EventHandler: " + method);
+                                    _eventHandlers[eventCode].Add(del);
+                                }
+                            }
+                        }
+
+                        methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
                                                                           .SelectMany(t => t.GetMethods())
-                                                                          .Where(m => m.GetCustomAttributes(typeof(AlbionMarshaller.EventHandler), false).Length > 0)
+                                                                          .Where(m => m.GetCustomAttributes(typeof(OperationHandler), false).Length > 0)
                                                                           .ToArray()).ToArray();
-                    foreach (MethodInfo method in methods)
-                    {
-                        var del = (HandleEvent)Delegate.CreateDelegate(typeof(HandleEvent), method);
-                        foreach (CustomAttributeData attributeData in method.CustomAttributes)
+                        foreach (MethodInfo method in methods)
                         {
-                            EventCodes eventCode = (EventCodes)attributeData.ConstructorArguments[0].Value;
-                            if (targetedEvents == null || targetedEvents.Contains(eventCode))
+                            var del = (HandleOperation)Delegate.CreateDelegate(typeof(HandleOperation), method);
+                            foreach (CustomAttributeData attributeData in method.CustomAttributes)
                             {
-                                if (!_eventHandlers.ContainsKey(eventCode))
+                                OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
+                                OperationType opType = (OperationType)attributeData.ConstructorArguments[1].Value;
+                                bool special = (bool)attributeData.ConstructorArguments[2].Value;
+                                if ((handleSpecial && special) || (targetedOperations == null || targetedOperations.Contains(opCode)))
                                 {
-                                    _eventHandlers.Add(eventCode, new List<HandleEvent>());
-                                }
-                                _eventHandlers[eventCode].Add(del);
-                            }
-                        }
-                    }
-
-                    methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
-                                                                      .SelectMany(t => t.GetMethods())
-                                                                      .Where(m => m.GetCustomAttributes(typeof(OperationHandler), false).Length > 0)
-                                                                      .ToArray()).ToArray();
-                    foreach (MethodInfo method in methods)
-                    {
-                        var del = (HandleOperation)Delegate.CreateDelegate(typeof(HandleOperation), method);
-                        foreach (CustomAttributeData attributeData in method.CustomAttributes)
-                        {
-                            OperationCodes opCode = (OperationCodes)attributeData.ConstructorArguments[0].Value;
-                            OperationType opType = (OperationType)attributeData.ConstructorArguments[1].Value;
-                            bool special = (bool)attributeData.ConstructorArguments[2].Value;
-                            if ((handleSpecial && special) || (targetedOperations == null || targetedOperations.Contains(opCode)))
-                            {
-                                if (opType == OperationType.Request)
-                                {
-                                    if (special)
+                                    if (opType == OperationType.Request)
                                     {
-                                        _specialRequestHandlers.Add(del);
+                                        if (special)
+                                        {
+                                            _specialRequestHandlers.Add(del);
+                                        }
+                                        else
+                                        {
+                                            if (!_requestHandlers.ContainsKey(opCode))
+                                            {
+                                                _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                            }
+                                            log.Debug("Adding OpEventHandlerRequest: " + method);
+                                            _requestHandlers[opCode].Add(del);
+                                        }
                                     }
                                     else
                                     {
-                                        if (!_requestHandlers.ContainsKey(opCode))
+                                        if (special)
                                         {
-                                            _requestHandlers.Add(opCode, new List<HandleOperation>());
+                                            _specialResponseHandlers.Add(del);
                                         }
-                                        _requestHandlers[opCode].Add(del);
-                                    }
-                                }
-                                else
-                                {
-                                    if (special)
-                                    {
-                                        _specialResponseHandlers.Add(del);
-                                    }
-                                    else
-                                    {
-                                        if (!_responseHandlers.ContainsKey(opCode))
+                                        else
                                         {
-                                            _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                            if (!_responseHandlers.ContainsKey(opCode))
+                                            {
+                                                _responseHandlers.Add(opCode, new List<HandleOperation>());
+                                            }
+                                            log.Debug("Adding OpEventHandlerResponse: " + method);
+                                            _responseHandlers[opCode].Add(del);
                                         }
-                                        _responseHandlers[opCode].Add(del);
                                     }
                                 }
                             }
                         }
-                    }
 
-                    methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
-                                                                      .SelectMany(t => t.GetMethods())
-                                                                      .Where(m => m.GetCustomAttributes(typeof(SpecialHandler), false).Length > 0)
-                                                                      .ToArray()).ToArray();
-                    foreach (MethodInfo method in methods)
-                    {
-                        var del = (HandleSpecial)Delegate.CreateDelegate(typeof(HandleSpecial), method);
-                        _specialHandler = del;
-                    }
+                        methods = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.GetTypes()
+                                                                          .SelectMany(t => t.GetMethods())
+                                                                          .Where(m => m.GetCustomAttributes(typeof(SpecialHandler), false).Length > 0)
+                                                                          .ToArray()).ToArray();
+                        foreach (MethodInfo method in methods)
+                        {
+                            var del = (HandleSpecial)Delegate.CreateDelegate(typeof(HandleSpecial), method);
+                            _specialHandler = del;
+                        }
 
-                    // Technically not initialized but everything after this is internal only
-                    _initialized = true;
+                        // Technically not initialized but everything after this is internal only
+                        _initialized = true;
+                        log.Debug("Finished initialization");
+                    }
                 }
+            }
+            catch(Exception e)
+            {
+                log.Error(e);
             }
         }
 
@@ -164,34 +179,41 @@ namespace AlbionMarshaller
 
         private void CreateListener()
         {
-            var allDevices = CaptureDeviceList.Instance;
-            if (allDevices.Count == 0)
+            try
             {
-                log.Debug("No Network Interface Found! Please make sure WinPcap is properly installed.");
-                return;
+                var allDevices = CaptureDeviceList.Instance;
+                if (allDevices.Count == 0)
+                {
+                    log.Debug("No Network Interface Found! Please make sure WinPcap is properly installed.");
+                    return;
+                }
+                for (int i = 0; i != allDevices.Count; i++)
+                {
+                    ICaptureDevice device = allDevices[i];
+
+                    if (device.Description != null)
+                    {
+                        log.Debug(" (" + device.Description + ")");
+                    }
+                    else
+                    {
+                        log.Debug(" (Unknown)");
+                    }
+
+                    device.OnPacketArrival += new PacketArrivalEventHandler(PacketHandle);
+                    device.Open(DeviceMode.Promiscuous, 0);
+                    device.Filter = "ip and udp and (port 5056 or port 5055 or port 4535)";
+                    if (device.LinkType != LinkLayers.Ethernet)
+                    {
+                        device.Close();
+                        continue;
+                    }
+                    device.StartCapture();
+                }
             }
-            for (int i = 0; i != allDevices.Count; i++)
+            catch(Exception e)
             {
-                ICaptureDevice device = allDevices[i];
-
-                if (device.Description != null)
-                {
-                    Debug.WriteLine(" (" + device.Description + ")");
-                }
-                else
-                {
-                    Debug.WriteLine(" (Unknown)");
-                }
-
-                device.OnPacketArrival += new PacketArrivalEventHandler(PacketHandle);
-                device.Open(DeviceMode.Promiscuous, 1000);
-                device.Filter = "ip and udp and (port 5056 or port 5055 or port 4535)";
-                if (device.LinkType != LinkLayers.Ethernet)
-                {
-                    device.Close();
-                    continue;
-                }
-                device.StartCapture();
+                log.Error(e);
             }
         }
 
@@ -199,7 +221,6 @@ namespace AlbionMarshaller
         {
             Packet packet = Packet.ParsePacket(e.Packet.LinkLayerType, e.Packet.Data);
             var udpPacket = packet.Extract<UdpPacket>();
-            var ipPacket = packet.Extract<IPPacket>();
 
             if (udpPacket == null)
             {

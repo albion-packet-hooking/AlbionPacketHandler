@@ -96,6 +96,7 @@
     <Compile Include="Model\Player.cs" />
     <Compile Include="Model\Resource.cs" />
     <Compile Include="OperationCodes.cs" />
+    <Compile Include="PacketQueue.cs" />
     <Compile Include="PhotonPacketHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

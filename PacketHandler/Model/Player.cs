@@ -57,6 +57,7 @@ namespace AlbionMarshaller.Model
         Bridgewatch = 3,
         FortSterling = 4,
         Thetford = 5,
+        Caerleon = 6,
         Red = 255
     }
 

@@ -60,7 +60,7 @@
                                     <TextBlock Text=" from (" Foreground="Green" />
                                     <TextBlock Text="{Binding BodyName}"/>
                                     <TextBlock Text=") at " Foreground="Green" />
-                                    <TextBlock Text="{Binding PickupTime}"/>
+                                    <TextBlock Text="{Binding UtcPickupTime}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </TreeView.Resources>

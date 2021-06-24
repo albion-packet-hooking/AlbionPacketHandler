@@ -46,6 +46,7 @@ namespace AlbionMarshaller.MemoryStorage
             public ResourceDB.ResourceType HarvestableType { get; set; }
             public int HarvestableTier { get; set; }
         }
+
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private Dictionary<int, MobDef> mobDictionary = new Dictionary<int, MobDef>();
         private Dictionary<string, HashSet<string>> harvestableToMob = new Dictionary<string, HashSet<string>>();
@@ -121,7 +122,7 @@ namespace AlbionMarshaller.MemoryStorage
             if (mobDictionary.ContainsKey(mobType))
             {
                 MobDef resType = mobDictionary[mobType];
-                Mob newMob = new Mob() { MobId = objectId, Name = resType.Name, HarvestableTier = resType.HarvestableTier, HarvestableType = resType.HarvestableType == null ? null : resType.HarvestableType.Type };
+                Mob newMob = new Mob() { MobId = objectId, UniqueName = resType.UniqueName, Name = resType.Name, HarvestableTier = resType.HarvestableTier, HarvestableType = resType.HarvestableType == null ? null : resType.HarvestableType.Type };
                 objectToMobMap.Add(objectId, newMob);
 
                 if (MobRemoved != null)
