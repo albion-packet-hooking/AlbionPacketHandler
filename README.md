@@ -14,6 +14,11 @@ Included Loot Logging UI and Framework
 
 Todo: Move hooking framework to it's own DLL and generate object classes for each event and operation to automatically convert deserialized photon data to objects to be passed in to each event and operation instead of Dictionary's
 
+# Update bin files
+The resources folder will contain a list of encrypted bin files. If a new release occurs you will need to drop the files from the game folder and the program will automate decrypting them on the next load up.
+
+Files are found at:
+[Game Installation Dir]/game/Albion-Online_Data/StreamingAssets/GameData
 
 # INSTALLATION
 1. Right click the ZIP file and go to Properties
